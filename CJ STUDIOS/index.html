@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="theme-color" content="#0A1F44">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CJ Studios">
+<title>CJ Studios — Facturation</title>
+    <link rel="apple-touch-icon" id="apple-icon" href="">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- SheetJS pour Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+    :root{
+    --primary:#0A1F44;--accent:#0088CC;--accent-light:#E0F3FF;
+    --green:#1D9E75;--green-light:#E1F5EE;
+    --pink:#00AADD;--pink-light:#E0F7FF;
+    --amber:#EF9F27;--amber-light:#FAEEDA;
+    --red:#E24B4A;--red-light:#FCEBEB;
+    --blue:#005FAA;--blue-light:#D6EBFF;
+    --invoice-color:#0088CC;
+    --bg:#F0F6FF;--card:#FFFFFF;--border:#D0E4F7;
+    --text:#0A1F44;--muted:#4A6FA5;--faint:#A0BEDD;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);overscroll-behavior:none}
+    .app{max-width:430px;margin:0 auto;min-height:100vh}
+
+    /* SPLASH */
+    #splash{position:fixed;inset:0;background:var(--primary);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .6s}
+    #splash.hide{opacity:0;pointer-events:none}
+    .splash-logo-wrap{width:90px;height:90px;border-radius:50%;background:#fff;border:3px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,136,204,.45);overflow:hidden}
+    #splash-logo-img{width:74px;height:74px;object-fit:contain;border-radius:50%;display:none}
+    #splash-logo-txt{font-size:24px;font-weight:900;color:var(--primary)}
+    .splash-title{color:#fff;font-size:26px;font-weight:900;letter-spacing:.5px}
+    .splash-sub{color:rgba(255,255,255,.4);font-size:12px;margin-top:6px;letter-spacing:.5px}
+    .splash-bar{width:130px;height:3px;background:rgba(255,255,255,.12);border-radius:2px;margin-top:36px;overflow:hidden}
+    .splash-fill{height:100%;background:#00AADD;border-radius:2px;animation:fill 1.4s ease forwards}
+    @keyframes fill{from{width:0}to{width:100%}}
+
+    /* HEADER */
+    .header{background:var(--primary);position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.35);padding-top:env(safe-area-inset-top,0px)}
+    .header-top{padding:11px 14px;display:flex;justify-content:space-between;align-items:center}
+    .header-logo-area{display:flex;align-items:center;gap:10px}
+    .logo-c{width:38px;height:38px;border-radius:50%;background:#fff;border:2px solid rgba(0,136,204,.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--primary);flex-shrink:0;overflow:hidden}
+    .logo-c img{width:100%;height:100%;object-fit:contain;border-radius:50%}
+    .agency-name{color:#fff;font-weight:800;font-size:14px;margin:0;line-height:1.2}
+    .agency-meta{color:rgba(255,255,255,.4);font-size:9px;margin:0}
+    .hdr-btns{display:flex;gap:8px}
+    .hdr-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;position:relative}
+    .notif-dot{width:7px;height:7px;border-radius:50%;background:var(--red);position:absolute;top:4px;right:4px;border:1.5px solid var(--primary);display:none}
+
+    /* BOTTOM NAV */
+    .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--primary);border-top:1px solid rgba(255,255,255,.07);display:grid;grid-template-columns:repeat(6,1fr);z-index:100;padding-bottom:env(safe-area-inset-bottom,0px)}
+    .nav-btn{padding:9px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:2px;border:none;background:transparent;color:rgba(255,255,255,.3);cursor:pointer;transition:all .2s;font-family:inherit}
+    .nav-btn.active{color:#fff}
+    .nav-icon{font-size:20px;line-height:1;transition:transform .2s}
+    .nav-btn.active .nav-icon{transform:scale(1.12)}
+    .nav-label{font-size:9px;font-weight:600;letter-spacing:.3px}
+    .nav-bar-ind{height:2px;background:#00AADD;border-radius:1px;margin-top:2px;width:0;transition:width .25s}
+    .nav-btn.active .nav-bar-ind{width:22px}
+
+    /* SCREENS */
+    .screen{display:none;padding:12px 12px 96px;animation:fadeUp .22s ease}
+    .screen.active{display:block}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+
+    /* CARDS */
+    .card,.section{background:var(--card);border-radius:14px;border:1px solid var(--border);margin-bottom:10px;overflow:hidden}
+    .card-head,.sec-head{background:var(--bg);padding:9px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .card-title,.sec-title{font-size:12px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px}
+    .card-body,.sec-body{padding:13px}
+
+    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+    .stat-card{background:var(--card);border-radius:14px;border:1px solid var(--border);padding:13px}
+    .stat-label{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+    .stat-val{font-size:22px;font-weight:900;color:var(--text);margin:4px 0 2px;line-height:1}
+    .stat-sub{font-size:10px;color:var(--muted)}
+
+    .list-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+    .list-row:last-child{border-bottom:none}
+    .row-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+    .row-info{min-width:0}
+    .row-info h4{font-size:12px;font-weight:700;color:var(--text);margin:0}
+    .row-info p{font-size:10px;color:var(--muted);margin:2px 0 0}
+    .row-right{margin-left:auto;text-align:right}
+    .row-amount{font-size:12px;font-weight:700;color:var(--text)}
+
+    .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700}
+    .b-green{background:var(--green-light);color:var(--green)}
+    .b-amber{background:var(--amber-light);color:var(--amber)}
+    .b-red{background:var(--red-light);color:var(--red)}
+    .b-blue{background:var(--blue-light);color:var(--blue)}
+    .b-purple{background:var(--accent-light);color:#3C3489}
+
+    /* FORMS */
+    .form-row{display:flex;flex-wrap:wrap;gap:8px}
+    .fg{flex:1 1 100%}
+    .fg.half{flex:1 1 45%;min-width:110px}
+    .fg.third{flex:1 1 28%;min-width:80px}
+    label.lbl{font-size:11px;color:var(--muted);display:block;margin-bottom:3px;font-weight:500}
+    input.fi,select.fi,textarea.fi{width:100%;padding:9px 11px;font-size:16px;border:1.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);outline:none;font-family:inherit;transition:border-color .2s;-webkit-appearance:none;appearance:none}
+    input.fi:focus,select.fi:focus,textarea.fi:focus{border-color:var(--accent)}
+    textarea.fi{resize:vertical}
+    input.fi[readonly]{background:var(--bg)}
+
+    /* BUTTONS */
+    .btn{padding:12px 18px;border-radius:12px;border:none;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:6px;width:100%}
+    .btn:active{transform:scale(.97)}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-success{background:var(--green);color:#fff}
+    .btn-dark{background:var(--primary);color:#fff}
+    .btn-outline{background:var(--bg);color:var(--text);border:1.5px solid var(--border)}
+    .btn-sm{padding:7px 12px;font-size:11px;border-radius:8px;width:auto}
+
+    /* TOTAUX */
+    .totaux-box{background:var(--card);border-radius:14px;border:1px solid var(--border);padding:14px;margin-bottom:10px}
+    .t-row{display:flex;justify-content:space-between;padding:4px 0}
+    .t-row span{font-size:12px;color:var(--muted)}
+    .t-row span.tv{font-size:12px;font-weight:600;color:var(--text)}
+    .t-row.big span{font-size:15px;font-weight:800;color:var(--text)}
+    .t-row.big span.tv{font-size:17px;font-weight:800;color:var(--invoice-color)}
+    .t-sep{border:none;border-top:1px solid var(--border);margin:8px 0}
+
+    /* STEP BAR */
+    .step-bar{display:flex;background:#0d0d22;padding:9px 16px;align-items:center}
+    .step-item{display:flex;align-items:center;gap:5px;flex:1}
+    .step-dot{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0}
+    .step-dot.done{background:var(--green);color:#fff}
+    .step-dot.active{background:var(--accent);color:#fff}
+    .step-dot.idle{background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.25)}
+    .step-lbl{font-size:9px;font-weight:700}
+    .step-lbl.done{color:var(--green)}
+    .step-lbl.active{color:#9ADCFF}
+    .step-lbl.idle{color:rgba(255,255,255,.25)}
+    .step-line{flex:1;height:1px;background:rgba(255,255,255,.08);margin:0 4px}
+
+    /* SIGNATURE */
+    .sig-wrap{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .sig-label{font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px}
+    .sig-canvas{width:100%;height:75px;border:1.5px dashed var(--faint);border-radius:10px;cursor:crosshair;touch-action:none;display:block;background:var(--bg);transition:all .2s}
+    .sig-canvas.signed{border-style:solid;border-color:var(--accent);background:var(--accent-light)}
+    .sig-hint{font-size:9px;color:var(--muted);text-align:center;margin-top:3px}
+    .sig-clear{display:flex;gap:8px;justify-content:center;margin-top:8px}
+
+    .ligne-box{background:var(--bg);border-radius:10px;padding:11px;margin-bottom:8px;position:relative}
+    .btn-rm{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--red);font-size:18px;cursor:pointer;line-height:1;padding:0}
+    .ligne-total{text-align:right;font-size:12px;font-weight:800;color:var(--invoice-color);margin-top:7px}
+
+    .bar-chart{display:flex;align-items:flex-end;gap:5px;height:110px;margin:8px 0 4px}
+    .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:100%}
+    .bar{width:100%;border-radius:4px 4px 0 0;min-height:3px;transition:height .6s}
+    .bar-lbl{font-size:8px;color:var(--muted);font-weight:500}
+    .bar-val{font-size:8px;font-weight:700;color:var(--muted)}
+    .chart-empty{width:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;height:100px}
+
+    .success-screen{padding:28px 18px;text-align:center}
+    .success-icon{font-size:60px;margin-bottom:14px;display:block}
+    .success-title{font-size:22px;font-weight:800;color:var(--green);margin-bottom:6px}
+    .success-sub{font-size:13px;color:var(--muted);margin-bottom:22px}
+    .success-card{background:var(--card);border-radius:14px;border:1px solid var(--border);padding:16px;margin-bottom:14px;text-align:left}
+    .sc-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
+    .sc-row:last-child{border-bottom:none}
+    .sc-label{font-size:11px;color:var(--muted)}
+    .sc-val{font-size:12px;font-weight:700;color:var(--text)}
+
+    .dtype-tabs{display:grid;grid-template-columns:repeat(3,1fr)}
+    .dtype-btn{padding:10px 4px;border:none;cursor:pointer;font-size:10px;font-weight:700;background:transparent;color:rgba(255,255,255,.4);border-bottom:3px solid transparent;transition:all .2s;font-family:inherit}
+    .dtype-btn.active{color:#fff;border-bottom-color:var(--invoice-color);background:rgba(0,136,204,.15)}
+
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;display:none;align-items:flex-end;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--card);border-radius:22px 22px 0 0;width:100%;max-width:430px;max-height:92vh;overflow-y:auto;padding:8px 16px 40px;animation:slideUp .3s ease}
+    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    .modal-handle{width:40px;height:4px;border-radius:2px;background:var(--faint);margin:10px auto 16px}
+    .modal-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:16px}
+
+    .color-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .color-swatch{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;flex-shrink:0}
+    .color-swatch.selected{border-color:var(--text);transform:scale(1.15)}
+
+    .inv-preview{background:#fff;border-radius:12px;border:1px solid #ddd;padding:14px;font-size:10px;color:#333}
+
+    #install-banner{background:linear-gradient(135deg,var(--accent),#00AADD);padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:10px;border-radius:14px}
+    #install-banner p{color:#fff;font-size:12px;font-weight:700;flex:1;margin:0}
+    #install-banner small{color:rgba(255,255,255,.7);font-size:9px;display:block}
+    .install-btn{background:rgba(255,255,255,.22);color:#fff;border:1.5px solid rgba(255,255,255,.4);border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;font-family:inherit}
+
+    .quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .quick-btn{padding:13px 6px;border-radius:12px;border:1px solid var(--border);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:4px}
+    .quick-btn:active{transform:scale(.95)}
+    .quick-icon{font-size:20px;line-height:1}
+
+    /* PRINT AREA */
+    #print-area{display:none;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;color:#222;background:#fff;padding:20px 24px;max-width:210mm;margin:0 auto}
+    @page{size:A4;margin:10mm}
+    @media print{
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+    html,body{background:#fff!important;height:auto!important}
+    body>*:not(#print-area){display:none!important}
+    #print-area{display:block!important;position:static!important;width:100%;max-width:none;padding:0;margin:0}
+    }
+    </style>
+</head>
+<body>
+<div class="app">
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo-wrap">
+    <img id="splash-logo-img" src="logos/logoPlan.png" alt="">
+    <span id="splash-logo-txt">CJS</span>
+  </div>
+  <p class="splash-title" id="splash-agency-name">CJ Studios</p>
+  <p class="splash-sub">Application de Facturation</p>
+  <div class="splash-bar"><div class="splash-fill"></div></div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="header-logo-area">
+      <div class="logo-c">
+        <img id="header-logo-img" src="logos/logoPlan.png" alt="" style="display:none">
+        <span id="header-logo-txt">CJS</span>
+      </div>
+      <div>
+        <p class="agency-name" id="header-agency-name">CJ Studios</p>
+        <p class="agency-meta" id="header-agency-meta">Yaoundé, Cameroun</p>
+      </div>
+    </div>
+    <div class="hdr-btns">
+      <button class="hdr-btn" onclick="openDocs()" aria-label="Documents"><i class="fa-solid fa-folder" style="font-size: 20px; color: #fd9002;"></i></button>
+      <button class="hdr-btn" onclick="openSettings()" aria-label="Paramètres"><i class="fa-solid fa-gear" style="font-size: 20px; color: #fafafa;"></i></button>
+      <button class="hdr-btn" onclick="showNotifs()" aria-label="Notifications"><i class="fa-solid fa-bell" style="font-size: 20px; color: #fd9002;"></i><span class="notif-dot" id="notif-dot"></span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ACCUEIL -->
+<div class="screen active" id="screen-home">
+  <div id="install-banner">
+    <div><p>Installer CJ Studios sur votre mobile</p><small>Nécessite un hébergement web (HTTP/HTTPS)</small></div>
+    <button class="install-btn" onclick="installApp()">Installer</button>
+  </div>
+
+  <!-- Alerte rappel sauvegarde (7 jours) -->
+  <div id="backup-reminder-banner" style="display:none;background:var(--amber-light);border:1px solid var(--amber);padding:10px 12px;border-radius:12px;margin-bottom:10px;align-items:center;gap:10px">
+    <span style="font-size:20px">⚠️</span>
+    <div style="flex:1">
+      <p style="font-size:11px;font-weight:700;color:var(--text);margin:0">Rappel de sauvegarde</p>
+      <small style="color:var(--muted)">Plus de 7 jours sans export Excel/JSON. Pensez à sauvegarder vos données !</small>
+    </div>
+    <button class="btn btn-sm" style="background:var(--amber);color:#fff" onclick="openSettings()">Sauvegarder</button>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card" style="border-left:3px solid var(--green)">
+      <p class="stat-label">Ventes du mois</p>
+      <p class="stat-val" id="dash-ventes">0</p>
+      <p class="stat-sub" id="dash-ventes-sub">FCFA · aucune facture</p>
+    </div>
+    <div class="stat-card" style="border-left:3px solid var(--accent)">
+      <p class="stat-label">Factures émises</p>
+      <p class="stat-val" id="dash-factures">0</p>
+      <p class="stat-sub" id="dash-factures-sub">Aucune facture ce mois</p>
+    </div>
+    <div class="stat-card" style="border-left:3px solid var(--pink)">
+      <p class="stat-label">Bons de livraison</p>
+      <p class="stat-val" id="dash-bons">0</p>
+      <p class="stat-sub">Ce mois-ci</p>
+    </div>
+    <div class="stat-card" style="border-left:3px solid var(--red)">
+      <p class="stat-label">Stock critique</p>
+      <p class="stat-val" id="dash-stock" style="color:var(--green)">0</p>
+      <p class="stat-sub" id="dash-stock-sub">Tous les stocks sont OK</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="card-title">📈 Ventes mensuelles (FCFA)</span></div>
+    <div class="card-body"><div class="bar-chart" id="dash-chart"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="card-title">⚡ Accès rapides</span></div>
+    <div class="card-body">
+      <div class="quick-grid">
+        <button class="quick-btn" style="background:var(--accent-light);color:#3C3489" onclick="goScreen('invoices')"><span class="quick-icon">🧾</span>Nouvelle Facture</button>
+        <button class="quick-btn" style="background:var(--green-light);color:var(--green)" onclick="goScreen('orders')"><span class="quick-icon">📦</span>Bon Commande</button>
+        <button class="quick-btn" style="background:var(--pink-light);color:var(--pink)" onclick="goScreen('delivery')"><span class="quick-icon">🚚</span>Bon Livraison</button>
+        <button class="quick-btn" style="background:var(--amber-light);color:var(--amber)" onclick="goScreen('receipt')"><span class="quick-icon">💰</span>Reçu Paiement</button>
+        <button class="quick-btn" style="background:var(--blue-light);color:var(--blue)" onclick="goScreen('stock')"><span class="quick-icon">🏬</span>Gestion Stock</button>
+        <button class="quick-btn" style="background:#E0F3FF;color:#0088CC" onclick="goScreen('agenda')"><span class="quick-icon">📅</span>Agenda</button>
+        <button class="quick-btn" style="background:#D6EBFF;color:#005FAA" onclick="goScreen('reports')"><span class="quick-icon">📊</span>Bilans</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="card-title">📅 Prochains événements</span><button onclick="goScreen('agenda')" style="font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;font-weight:700">Voir tout →</button></div>
+    <div class="card-body" style="padding:8px 13px"><div id="dash-agenda-list"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="card-title">🕐 Dernières activités</span></div>
+    <div class="card-body" style="padding:8px 13px"><div id="activity-feed"></div></div>
+  </div>
+</div>
+
+<!-- FACTURES -->
+<div class="screen" id="screen-invoices">
+  <div style="background:var(--primary);margin:-12px -12px 12px">
+    <div class="dtype-tabs">
+      <button class="dtype-btn active" id="dt-facture" onclick="setDtype(this,'FACTURE')"><i class="fa-solid fa-file-invoice"></i> Facture</button>
+      <button class="dtype-btn" id="dt-devis" onclick="setDtype(this,'DEVIS')">📋 Devis</button>
+      <button class="dtype-btn" id="dt-recu" onclick="setDtype(this,'REÇU')">✅ Reçu</button>
+    </div>
+    <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <p id="inv-type-lbl" style="color:var(--invoice-color);font-weight:800;font-size:15px;margin:0">FACTURE</p>
+        <p style="color:rgba(255,255,255,.5);font-size:10px;margin:2px 0 0">N° <span id="inv-num"></span></p>
+        <p style="color:rgba(255,255,255,.35);font-size:9px;margin:0">Émis le <span id="inv-date-lbl"></span></p>
+      </div>
+      <div id="inv-header-logo" style="text-align:right"></div>
+    </div>
+    <div class="step-bar" id="inv-step-bar"></div>
+  </div>
+
+  <div id="inv-s1">
+    <div class="section"><div class="sec-head"><span class="sec-title">👤 Informations client</span></div>
+      <div class="sec-body"><div class="form-row">
+        <div class="fg"><label class="lbl">Nom / Société *</label><input class="fi" id="iv-nom" placeholder="Nom du client ou société"></div>
+        <div class="fg half"><label class="lbl">NIU</label><input class="fi" id="iv-niu" placeholder="NIU du client"></div>
+        <div class="fg half"><label class="lbl">Téléphone</label><input class="fi" id="iv-tel" placeholder="+237 6XX XXX XXX"></div>
+        <div class="fg"><label class="lbl">Email</label><input class="fi" id="iv-email" placeholder="email@client.cm"></div>
+        <div class="fg"><label class="lbl">Adresse</label><input class="fi" id="iv-adresse" placeholder="Adresse du client"></div>
+      </div></div>
+    </div>
+    <div class="section"><div class="sec-head"><span class="sec-title">📅 Paramètres</span></div>
+      <div class="sec-body"><div class="form-row">
+        <div class="fg half"><label class="lbl">Date émission</label><input class="fi" id="iv-date"></div>
+        <div class="fg half"><label class="lbl">Échéance (jj/mm/aaaa)</label><input class="fi" id="iv-ech"></div>
+        <div class="fg"><label class="lbl">Mode de paiement</label>
+          <select class="fi" id="iv-mode"><option>Virement bancaire</option><option>Espèces</option><option>Mobile Money MTN</option><option>Mobile Money Orange</option><option>Chèque</option><option>Carte bancaire</option></select>
+        </div>
+        <div class="fg"><label class="lbl">Objet / Référence</label><input class="fi" id="iv-objet" placeholder="Objet de la facture"></div>
+      </div></div>
+    </div>
+    <button class="btn btn-primary" onclick="invNext(1)">Suivant : Articles →</button>
+  </div>
+
+  <div id="inv-s2" style="display:none">
+    <div class="section"><div class="sec-head"><span class="sec-title">📦 Lignes de facturation</span></div>
+      <div class="sec-body"><div id="inv-lignes"></div>
+        <button class="btn btn-outline btn-sm" onclick="addInvLigne()">+ Ajouter une ligne</button>
+      </div>
+    </div>
+    <div class="totaux-box">
+      <div class="t-row"><span>Sous-total HT</span><span class="tv" id="inv-ht">0 FCFA</span></div>
+      <div class="t-row" id="inv-remise-row" style="display:none"><span>Remise</span><span class="tv" id="inv-remise-val" style="color:var(--red)">- 0 FCFA</span></div>
+      <div class="t-row"><span>Base imposable</span><span class="tv" id="inv-base">0 FCFA</span></div>
+      <div class="t-row"><span>Taxes</span><span class="tv" id="inv-tva">0 FCFA</span></div>
+      <hr class="t-sep">
+      <div class="t-row big"><span>TOTAL TTC</span><span class="tv" id="inv-ttc">0 FCFA</span></div>
+    </div>
+    <div class="section"><div class="sec-head"><span class="sec-title">🏷️ Remise</span></div>
+      <div class="sec-body"><div class="form-row">
+        <div class="fg half"><label class="lbl">Remise (%)</label><input class="fi" type="number" min="0" max="100" id="inv-remise-pct" value="0" oninput="calcInvTotaux()"></div>
+        <div class="fg half"><label class="lbl">Montant remise</label><input class="fi" id="inv-remise-mt" readonly></div>
+      </div></div>
+    </div>
+
+    <div class="section"><div class="sec-head"><span class="sec-title">🧾 Taxes applicables</span><span class="badge b-purple">Optionnel</span></div>
+      <div class="sec-body">
+        <div id="tax-list"></div>
+        <button class="btn btn-outline btn-sm" onclick="addCustomTax()" style="margin-top:8px;color:var(--accent);border-color:var(--accent)">+ Ajouter une taxe personnalisée</button>
+        <div id="custom-tax-form" style="display:none;margin-top:10px;background:var(--bg);border-radius:10px;padding:10px">
+          <div class="form-row">
+            <div class="fg half"><label class="lbl">Nom de la taxe</label><input class="fi" id="ctax-name" placeholder="Nom de la taxe"></div>
+            <div class="fg half"><label class="lbl">Taux (%)</label><input class="fi" type="number" id="ctax-rate" placeholder="ex: 2.5" min="0" step="any"></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn btn-primary btn-sm" onclick="saveCustomTax()" style="flex:1">Ajouter</button>
+            <button class="btn btn-outline btn-sm" onclick="$('custom-tax-form').style.display='none'" style="flex:1">Annuler</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section"><div class="sec-head"><span class="sec-title">🚚 Frais de livraison</span></div>
+      <div class="sec-body">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--accent);cursor:pointer;background:var(--accent-light)" id="liv-opt-none">
+            <input type="radio" name="livraison" value="none" checked onchange="updateLivraison()" style="accent-color:var(--accent);width:16px;height:16px">
+            <div><p style="font-size:13px;font-weight:700;color:var(--text);margin:0">Sans livraison</p></div>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;background:var(--bg)" id="liv-opt-free">
+            <input type="radio" name="livraison" value="free" onchange="updateLivraison()" style="accent-color:var(--accent);width:16px;height:16px">
+            <div><p style="font-size:13px;font-weight:700;color:var(--green);margin:0">🎁 Livraison offerte</p></div>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;background:var(--bg)" id="liv-opt-paid">
+            <input type="radio" name="livraison" value="paid" onchange="updateLivraison()" style="accent-color:var(--accent);width:16px;height:16px">
+            <div style="flex:1"><p style="font-size:13px;font-weight:700;color:var(--text);margin:0">Frais de livraison facturés</p></div>
+          </label>
+        </div>
+        <div id="liv-montant-wrap" style="display:none;margin-top:10px">
+          <label class="lbl">Montant des frais de livraison (FCFA)</label>
+          <input class="fi" type="number" id="liv-montant" value="0" min="0" oninput="calcInvTotaux()" placeholder="ex: 5000">
+        </div>
+      </div>
+    </div>
+
+    <div class="section"><div class="sec-head"><span class="sec-title">📝 Notes</span></div>
+      <div class="sec-body"><textarea class="fi" id="iv-note" rows="3" placeholder="Notes ou conditions de paiement..."></textarea></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline" onclick="invBack(2)" style="flex:1">← Retour</button>
+      <button class="btn btn-primary" onclick="invNext(2)" style="flex:2">Signatures →</button>
+    </div>
+  </div>
+
+  <div id="inv-s3" style="display:none">
+    <div class="section"><div class="sec-head"><span class="sec-title">✍️ Signatures numériques</span></div>
+      <div class="sec-body">
+        <div class="sig-wrap">
+          <div><p class="sig-label">Agence</p><canvas id="sig-inv-agence" class="sig-canvas" width="180" height="75"></canvas><p class="sig-hint" id="sih-ia">✏️ Signez ici</p></div>
+          <div><p class="sig-label">Client *</p><canvas id="sig-inv-client" class="sig-canvas" width="180" height="75"></canvas><p class="sig-hint" id="sih-ic">✏️ Signez ici</p></div>
+        </div>
+        <div class="sig-clear">
+          <button class="btn btn-sm btn-outline" style="color:var(--red);border-color:var(--red)" onclick="clearSig('sig-inv-agence','sih-ia',()=>{sigInvA=null;updateInvPreview()})">Effacer agence</button>
+          <button class="btn btn-sm btn-outline" style="color:var(--red);border-color:var(--red)" onclick="clearSig('sig-inv-client','sih-ic',()=>{sigInvC=null;updateInvPreview()})">Effacer client</button>
+        </div>
+        <p id="sig-inv-ok" style="display:none;font-size:10px;color:var(--green);text-align:center;margin-top:8px">✓ Les deux signatures enregistrées</p>
+      </div>
+    </div>
+    <div class="section"><div class="sec-head"><span class="sec-title">🖨️ Aperçu</span></div>
+      <div class="sec-body" style="padding:0"><div class="inv-preview" style="border-radius:0;border:none" id="inv-preview"></div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-outline" onclick="invBack(3)" style="flex:1">← Retour</button>
+      <button class="btn btn-success" onclick="submitInvoice()" style="flex:2">✅ Valider</button>
+    </div>
+  </div>
+
+  <div id="inv-success" style="display:none" class="success-screen">
+    <span class="success-icon">🎉</span>
+    <h2 class="success-title">Document généré !</h2>
+    <p class="success-sub" id="inv-succ-sub"></p>
+    <div class="success-card">
+      <div class="sc-row"><span class="sc-label">Client</span><span class="sc-val" id="inv-succ-cl"></span></div>
+      <div class="sc-row"><span class="sc-label">Taxes</span><span class="sc-val" id="inv-succ-tva"></span></div>
+      <div class="sc-row"><span class="sc-label">Total TTC</span><span class="sc-val" id="inv-succ-ttc" style="color:var(--invoice-color);font-size:16px"></span></div>
+    </div>
+    <button class="btn btn-primary" onclick="resetScreen('invoices')">Nouveau document</button>
+  </div>
+</div>
+
+<!-- BON DE COMMANDE -->
+<div class="screen" id="screen-orders">
+  <div style="background:var(--primary);margin:-12px -12px 12px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <p style="color:var(--green);font-weight:800;font-size:15px;margin:0">BON DE COMMANDE</p>
+      <p id="bc-num-lbl" style="color:rgba(255,255,255,.5);font-size:10px;margin:2px 0 0"></p>
+    </div>
+    <div id="bc-header-logo"></div>
+  </div>
+  <div id="bc-form">
+    <div class="section"><div class="sec-head"><span class="sec-title">👤 Client</span></div>
+      <div class="sec-body"><div class="form-row">
+        <div class="fg"><label class="lbl">Nom / Société *</label><input class="fi" id="bc-nom" placeholder="Nom du client"></div>
+        <div class="fg half"><label class="lbl">Téléphone</label><input class="fi" id="bc-tel" placeholder="+237 6XX XXX XXX"></div>
+        <div class="fg half"><label class="lbl">Adresse</label><input class="fi" id="bc-adr" placeholder="Adresse du client"></div>
+      </div></div>
+    </div>
+    <div class="section"><div class="sec-head"><span class="sec-title">📦 Articles</span></div>
+      <div class="sec-body"><div id="bc-lignes"></div>
+        <button class="btn btn-outline btn-sm" onclick="addBCLigne()">+ Ajouter</button>
+      </div>
+    </div>
+    <div class="totaux-box">
+      <div class="t-row"><span>Sous-total HT</span><span class="tv" id="bc-ht">0 FCFA</span></div>
+      <div class="t-row"><span>TVA (19,25%)</span><span class="tv" id="bc-tva">0 FCFA</span></div>
+      <hr class="t-sep">
+      <div class="t-row big"><span>TOTAL TTC</span><span class="tv" id="bc-ttc">0 FCFA</span></div>
+    </div>
+    <button class="btn btn-dark" onclick="submitBC()">Enregistrer le bon de commande</button>
+  </div>
+  <div id="bc-success" style="display:none" class="success-screen">
+    <span class="success-icon">✅</span><h2 class="success-title">Bon enregistré !</h2>
+    <button class="btn btn-success" onclick="resetScreen('orders')">Nouveau bon</button>
+  </div>
+</div>
+
+<!-- BON DE LIVRAISON -->
+<div class="screen" id="screen-delivery">
+  <div style="background:var(--primary);margin:-12px -12px 12px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <p style="color:var(--pink);font-weight:800;font-size:15px;margin:0">BON DE LIVRAISON</p>
+      <p id="bl-num-lbl" style="color:rgba(255,255,255,.5);font-size:10px;margin:2px 0 0"></p>
+    </div>
+    <div id="bl-header-logo"></div>
+  </div>
+  <div id="bl-form">
+    <div class="section"><div class="sec-head"><span class="sec-title">📍 Destinataire</span></div>
+      <div class="sec-body"><div class="form-row">
+        <div class="fg"><label class="lbl">Client *</label><input class="fi" id="bl-nom" placeholder="Nom du client"></div>
+        <div class="fg half"><label class="lbl">Téléphone</label><input class="fi" id="bl-tel" placeholder="+237 6XX XXX XXX"></div>
+      </div></div>
+    </div>
+    <div class="section"><div class="sec-head"><span class="sec-title">📋 Articles</span></div>
+      <div class="sec-body"><div id="bl-articles"></div>
+        <button class="btn btn-outline btn-sm" onclick="addBLArticle()">+ Ajouter</button>
+      </div>
+    </div>
+    <button class="btn btn-dark" onclick="submitBL()">Valider la livraison</button>
+  </div>
+  <div id="bl-success" style="display:none" class="success-screen">
+    <span class="success-icon">🚚</span><h2 class="success-title">Livraison confirmée !</h2>
+    <button class="btn" style="background:var(--pink);color:#fff" onclick="resetScreen('delivery')">Nouveau bon</button>
+  </div>
+</div>
+
+<!-- REÇU DE PAIEMENT -->
+<div class="screen" id="screen-receipt">
+  <div style="background:var(--primary);margin:-12px -12px 10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <p style="color:var(--amber);font-weight:800;font-size:15px;margin:0">REÇU DE PAIEMENT</p>
+      <p id="rc-num-lbl" style="color:rgba(255,255,255,.5);font-size:10px;margin:2px 0 0"></p>
+    </div>
+    <div id="rc-header-logo"></div>
+  </div>
+  <div id="rc-form">
+    <div class="section"><div class="sec-head"><span class="sec-title">👤 Client</span></div>
+      <div class="sec-body"><div class="form-row">
+        <div class="fg"><label class="lbl">Nom / Société *</label><input class="fi" id="rc-nom" placeholder="Nom du client"></div>
+      </div></div>
+    </div>
+    <div class="section"><div class="sec-head"><span class="sec-title">💵 Paiement</span></div>
+      <div class="sec-body"><div class="form-row">
+        <div class="fg"><label class="lbl">Montant reçu (FCFA) *</label><input class="fi" type="number" id="rc-recu" value="0" min="0"></div>
+      </div></div>
+    </div>
+    <button class="btn btn-dark" onclick="submitRC()">Émettre le reçu de paiement</button>
+  </div>
+  <div id="rc-success" style="display:none" class="success-screen">
+    <span class="success-icon">💰</span><h2 class="success-title">Paiement enregistré !</h2>
+    <button class="btn" style="background:var(--amber);color:#fff" onclick="resetScreen('receipt')">Nouveau reçu</button>
+  </div>
+</div>
+
+<!-- STOCK -->
+<div class="screen" id="screen-stock">
+  <div style="background:var(--primary);margin:-12px -12px 10px">
+    <div style="padding:11px 16px;display:flex;justify-content:space-between;align-items:center">
+      <div><p style="color:#fff;font-weight:800;font-size:13px;margin:0">Gestion des Stocks</p></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr)">
+      <button class="dtype-btn active" id="st-tab-list" onclick="switchStockTab('list')">📦 Stock</button>
+      <button class="dtype-btn" id="st-tab-mouv" onclick="switchStockTab('mouv')">🔄 Mouvements</button>
+      <button class="dtype-btn" id="st-tab-add" onclick="switchStockTab('add')">➕ Ajouter</button>
+    </div>
+  </div>
+  <div id="st-screen-list">
+    <input id="stock-search" class="fi" placeholder="🔍 Rechercher..." oninput="renderStock()" style="margin-bottom:10px">
+    <div id="stock-list"></div>
+  </div>
+  <div id="st-screen-mouv" style="display:none">
+    <div class="section"><div class="sec-head"><span class="sec-title">🔄 Enregistrer un mouvement</span></div>
+      <div class="sec-body"><button class="btn btn-success" onclick="appliquerMouvement()">Enregistrer</button></div>
+    </div>
+  </div>
+  <div id="st-screen-add" style="display:none">
+    <div class="section"><div class="sec-head"><span class="sec-title">➕ Nouvel article</span></div>
+      <div class="sec-body">
+        <div class="form-row">
+          <div class="fg"><label class="lbl">Nom de l'article *</label><input class="fi" id="na-nom"></div>
+        </div>
+        <button class="btn btn-success" onclick="ajouterArticle()" style="margin-top:12px">✅ Ajouter</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RAPPORTS -->
+<div class="screen" id="screen-reports">
+  <div style="background:var(--primary);margin:-12px -12px 12px;padding:12px 16px">
+    <p style="color:#00AADD;font-weight:800;font-size:15px;margin:0 0 2px">📊 Bilans & Rapports</p>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-card" style="border-left:3px solid var(--green)"><p class="stat-label">CA HT</p><p class="stat-val" id="rep-ht">0</p></div>
+    <div class="stat-card" style="border-left:3px solid var(--accent)"><p class="stat-label">Total TTC</p><p class="stat-val" id="rep-ttc">0</p></div>
+  </div>
+  <button class="btn btn-success" onclick="exportBilanPDF()" style="margin-top:4px">📊 Exporter le bilan en PDF</button>
+</div>
+
+<!-- AGENDA -->
+<div class="screen" id="screen-agenda">
+  <div style="background:var(--primary);margin:-12px -12px 12px;padding:12px 16px">
+    <p style="color:#00AADD;font-weight:800;font-size:15px;margin:0">📅 Agenda</p>
+    <button onclick="openNewEvent()" style="background:#0088CC;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;margin-top:8px">+ Nouveau</button>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">📋 Événements</span></div>
+    <div class="card-body" style="padding:8px 13px"><div id="agenda-list"></div></div>
+  </div>
+</div>
+
+<!-- NEW EVENT MODAL -->
+<div class="modal-overlay" id="event-overlay" onclick="if(event.target.id==='event-overlay')closeNewEvent()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <p class="modal-title">📅 Nouvel événement</p>
+    <div class="form-row">
+      <div class="fg"><label class="lbl">Titre *</label><input class="fi" id="ev-titre"></div>
+    </div>
+    <button class="btn btn-primary" onclick="saveEvent()" style="margin-top:12px">Enregistrer</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="goScreen('home')"><span class="nav-icon">🏠</span><span class="nav-label">Accueil</span><div class="nav-bar-ind"></div></button>
+  <button class="nav-btn" id="nav-invoices" onclick="goScreen('invoices')"><span class="nav-icon"><i class="fa-solid fa-file-invoice"></i></span><span class="nav-label">Factures</span><div class="nav-bar-ind"></div></button>
+  <button class="nav-btn" id="nav-orders" onclick="goScreen('orders')"><span class="nav-icon"><i class="fa-solid fa-cart-shopping"></i></span><span class="nav-label">Bons</span><div class="nav-bar-ind"></div></button>
+  <button class="nav-btn" id="nav-stock" onclick="goScreen('stock')"><span class="nav-icon"><i class="fa-solid fa-boxes-stacked"></i></span><span class="nav-label">Stock</span><div class="nav-bar-ind"></div></button>
+  <button class="nav-btn" id="nav-agenda" onclick="goScreen('agenda')"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="nav-label">Agenda</span><div class="nav-bar-ind"></div></button>
+  <button class="nav-btn" id="nav-reports" onclick="goScreen('reports')"><span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span><span class="nav-label">Bilans</span><div class="nav-bar-ind"></div></button>
+</nav>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settings-overlay" onclick="if(event.target.id==='settings-overlay')closeSettings()">
+  <div class="modal" id="settings-modal">
+    <div class="modal-handle"></div>
+    <p class="modal-title">⚙️ Paramètres de l'agence</p>
+
+    <div class="section"><div class="sec-head"><span class="sec-title">🏢 Informations de l'agence</span></div>
+      <div class="sec-body"><div class="form-row">
+        <div class="fg"><label class="lbl">Nom de l'agence</label><input class="fi" id="set-agency-name" value="CJ Studios" oninput="applySettings()"></div>
+      </div></div>
+    </div>
+
+    <!-- Sauvegarde & Restauration Excel / JSON -->
+    <div class="section"><div class="sec-head"><span class="sec-title">💾 Sauvegarde & Restauration</span></div>
+      <div class="sec-body">
+        <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Sauvegardez vos données en Excel (multifeuilles) ou en JSON.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+          <button class="btn btn-outline btn-sm" style="flex:1" onclick="exportExcel()">📊 Exporter Excel</button>
+          <label class="btn btn-outline btn-sm" style="flex:1;cursor:pointer">📂 Importer Excel<input type="file" accept=".xlsx, .xls" style="display:none" onchange="importExcel(this)"></label>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" style="flex:1" onclick="exportBackup()">⬇ Exporter JSON</button>
+          <label class="btn btn-outline btn-sm" style="flex:1;cursor:pointer">⬆ Importer JSON<input type="file" accept="application/json" style="display:none" onchange="importBackup(this)"></label>
+        </div>
+        <div style="margin-top:10px">
+          <button class="btn btn-primary btn-sm" style="width:100%" onclick="autoSaveFile()">💾 Sauvegarde automatique (Chrome/Edge Bureau)</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-dark" onclick="closeSettings()" style="margin-top:4px">✅ Enregistrer et fermer</button>
+  </div>
+</div>
+
+<!-- DOCUMENTS MODAL -->
+<div class="modal-overlay" id="docs-overlay" onclick="if(event.target.id==='docs-overlay')closeDocs()">
+  <div class="modal" id="docs-modal" style="max-height:95vh">
+    <div class="modal-handle"></div>
+    <p class="modal-title" style="margin:0">📁 Mes Documents</p>
+    <div id="docs-list" style="max-height:50vh;overflow-y:auto;margin-top:10px"></div>
+  </div>
+</div>
+
+</div><!-- end .app -->
+<div id="print-area"></div>
+
+<script>
+const CJS_LOGO="";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(Math.round(n||0))+' FCFA';
+const fmtN=n=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(Math.round(n||0));
+const today=()=>new Date().toLocaleDateString('fr-FR');
+const isoToday=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
+const monthKey=s=>String(s||'').slice(3);
+
+const KEY={docs:'cjs_docs_v2',agenda:'cjs_agenda_v1',stock:'cjs_stock_v1',settings:'cjs_settings_v1',counters:'cjs_counters_v1',lastExport:'cjs_last_export_v1'};
+const LS={
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){alert('⚠ Stockage plein.');return false;}}
+};
+
+let agencyState={name:'CJ Studios',invoiceColor:'#0088CC',defaultTaxes:[{id:1,name:'TVA',rate:19.25,enabled:true}]};
+Object.assign(agencyState,LS.get(KEY.settings,{}));
+let stockData=[],mouvHistory=[];
+{const s=LS.get(KEY.stock,{stock:[],mouv:[]});stockData=s.stock||[];mouvHistory=s.mouv||[];}
+
+let invDocType='FACTURE',invNum='';
+function goScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  $('screen-'+name).classList.add('active');
+  const nb=$('nav-'+name);if(nb)nb.classList.add('active');
+  window.scrollTo(0,0);
+}
+function resetScreen(name){location.reload();}
+function openSettings(){$('settings-overlay').classList.add('open');}
+function closeSettings(){$('settings-overlay').classList.remove('open');}
+function openDocs(){$('docs-overlay').classList.add('open');}
+function closeDocs(){$('docs-overlay').classList.remove('open');}
+function showNotifs(){}
+function installApp(){alert('Pour installer l\'application sur mobile, veuillez héberger ce fichier sur un serveur web (ex: GitHub Pages ou Netlify) afin d\'activer le protocole sécurisé requis par le navigateur.');}
+
+// Vérification du rappel de sauvegarde (7 jours)
+function checkBackupReminder(){
+  const lastExp=LS.get(KEY.lastExport,null);
+  if(!lastExp){$('backup-reminder-banner').style.display='flex';return;}
+  const diffDays=(Date.now()-new Date(lastExp).getTime())/(1000*3600*24);
+  if(diffDays>=7){$('backup-reminder-banner').style.display='flex';}
+  else{$('backup-reminder-banner').style.display='none';}
+}
+
+// EXPORT EXCEL (SheetJS avec une feuille par type)
+function exportExcel(){
+  const wb=XLSX.utils.book_new();
+  const docs=LS.get(KEY.docs,[]);
+
+  // 1. Factures
+  const factures=docs.filter(d=>d.type==='FACTURE').map(d=>({ID:d.id,Numéro:d.num,Client:d.client,Date:d.date,TotalHT:d.ht,TotalTTC:d.ttc,Statut:d.statut}));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(factures.length?factures:[{Info:'Aucune facture'}]),'Factures');
+
+  // 2. Devis
+  const devis=docs.filter(d=>d.type==='DEVIS').map(d=>({ID:d.id,Numéro:d.num,Client:d.client,Date:d.date,TotalTTC:d.ttc}));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(devis.length?devis:[{Info:'Aucun devis'}]),'Devis');
+
+  // 3. Reçus
+  const recus=docs.filter(d=>d.type==='REÇU').map(d=>({ID:d.id,Numéro:d.num,Client:d.client,Date:d.date,Montant:d.ttc}));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(recus.length?recus:[{Info:'Aucun reçu'}]),'Reçus');
+
+  // 4. Bons (BC & BL)
+  const bons=docs.filter(d=>d.type==='BC'||d.type==='BL').map(d=>({ID:d.id,Type:d.type,Numéro:d.num,Client:d.client,Date:d.date}));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(bons.length?bons:[{Info:'Aucun bon'}]),'Bons');
+
+  // 5. Stock
+  const stock=stockData.map(a=>({Nom:a.nom,Catégorie:a.cat,Quantité:a.qte,StockMin:a.min,PrixUnitaire:a.pu}));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(stock.length?stock:[{Info:'Aucun article'}]),'Stock');
+
+  // 6. Mouvements
+  const mouv=mouvHistory.map(m=>({Article:m.article,Type:m.type,Quantité:m.qte,Date:m.date,Note:m.note}));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(mouv.length?mouv:[{Info:'Aucun mouvement'}]),'Mouvements');
+
+  // 7. Agenda
+  const agenda=LS.get(KEY.agenda,[]).map(e=>({Titre:e.titre,Type:e.type,Date:e.date,Heure:e.heure,Client:e.client,Montant:e.montant}));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(agenda.length?agenda:[{Info:'Aucun événement'}]),'Agenda');
+
+  XLSX.writeFile(wb,'cj-studios-export-'+isoToday()+'.xlsx');
+  LS.set(KEY.lastExport,new Date().toISOString());
+  checkBackupReminder();
+}
+
+// IMPORT EXCEL
+function importExcel(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const data=new Uint8Array(e.target.result);
+      const wb=XLSX.read(data,{type:'array'});
+      
+      // Lecture de la feuille Stock si elle existe
+      if(wb.Sheets['Stock']){
+        const jsonStock=XLSX.utils.sheet_to_json(wb.Sheets['Stock']);
+        if(jsonStock.length) {
+          stockData=jsonStock.map(row=>({nom:row.Nom||'',cat:row.Catégorie||'Autre',qte:Number(row.Quantité)||0,min:Number(row.StockMin)||5,pu:Number(row.PrixUnitaire)||0}));
+        }
+      }
+      LS.set(KEY.stock,{stock:stockData,mouv:mouvHistory});
+      alert('✅ Import Excel réussi !');location.reload();
+    }catch(err){alert('Erreur lors de l\'import du fichier Excel.');}
+  };
+  r.readAsArrayBuffer(f);
+}
+
+// SAUVEGARDE AUTOMATIQUE SUR FICHIER (Chrome / Edge Bureau)
+async function autoSaveFile(){
+  if(!window.showSaveFilePicker){
+    alert('La sauvegarde automatique par accès fichier direct n\'est pas supportée par ce navigateur (utilisez Chrome ou Edge sur ordinateur). Utilisez l\'export Excel classique.');
+    return;
+  }
+  try{
+    const handle=await window.showSaveFilePicker({
+      suggestedName:'cj-studios-sauvegarde-'+isoToday()+'.json',
+      types:[{description:'Fichiers JSON',accept:{'application/json':['.json']}}]
+    });
+    const writable=await handle.createWritable();
+    const data={version:1,date:new Date().toISOString()};
+    Object.entries(KEY).forEach(([n,k])=>{data[n]=LS.get(k,null);});
+    await writable.write(JSON.stringify(data));
+    await writable.close();
+    LS.set(KEY.lastExport,new Date().toISOString());
+    checkBackupReminder();
+    alert('✅ Fichier de sauvegarde automatique mis à jour avec succès !');
+  }catch(e){console.log('Sauvegarde annulée ou non autorisée');}
+}
+
+// Export / Import JSON d'origine
+function exportBackup(){
+  const data={version:1,date:new Date().toISOString()};
+  Object.entries(KEY).forEach(([n,k])=>{data[n]=LS.get(k,null);});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
+  a.download='cj-studios-sauvegarde-'+isoToday()+'.json';
+  document.body.appendChild(a);a.click();a.remove();
+  LS.set(KEY.lastExport,new Date().toISOString());
+  checkBackupReminder();
+}
+function importBackup(input){
+  const f=input.files[0];if(!f)return;
+  if(!confirm('Importer cette sauvegarde remplacera les données actuelles. Continuer ?')){input.value='';return;}
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      Object.entries(KEY).forEach(([n,k])=>{if(d[n]!==null&&d[n]!==undefined)localStorage.setItem(k,JSON.stringify(d[n]));});
+      alert('✅ Sauvegarde JSON importée.');location.reload();
+    }catch(err){alert('Fichier invalide.');}
+  };
+  r.readAsText(f);
+}
+
+// Initialisation au chargement
+window.addEventListener('DOMContentLoaded',()=>{
+  checkBackupReminder();
+  setTimeout(()=>{$('splash').classList.add('hide');},800);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "CJ Studios",
+  "short_name": "CJ Studios",
+  "start_url": "./Cjstudios.html",
+  "display": "standalone",
+  "background_color": "#0A1F44",
+  "theme_color": "#0A1F44",
+  "icons": [
+    {
+      "src": "logos/logoPlan.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logos/logoPlan.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
