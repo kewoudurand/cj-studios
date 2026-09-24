@@ -10,10 +10,8 @@
 <meta name="apple-mobile-web-app-title" content="CJ Studios">
 <title>CJ Studios — Facturation</title>
     <link rel="apple-touch-icon" id="apple-icon" href="">
-    <link rel="manifest" href="./manifest.json">
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <!-- SheetJS pour Excel -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
     :root{
     --primary:#0A1F44;--accent:#0088CC;--accent-light:#E0F3FF;
@@ -158,6 +156,9 @@
     .bar-val{font-size:8px;font-weight:700;color:var(--muted)}
     .chart-empty{width:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;height:100px}
 
+    .progress{height:5px;background:var(--bg);border-radius:3px;overflow:hidden;margin-top:5px}
+    .progress-fill{height:100%;border-radius:3px;transition:width .4s}
+
     .success-screen{padding:28px 18px;text-align:center}
     .success-icon{font-size:60px;margin-bottom:14px;display:block}
     .success-title{font-size:22px;font-weight:800;color:var(--green);margin-bottom:6px}
@@ -184,6 +185,15 @@
     .color-swatch.selected{border-color:var(--text);transform:scale(1.15)}
 
     .inv-preview{background:#fff;border-radius:12px;border:1px solid #ddd;padding:14px;font-size:10px;color:#333}
+    .inv-ph{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #1a1a2e;padding-bottom:10px;margin-bottom:10px}
+    .inv-table{width:100%;border-collapse:collapse;font-size:9px;margin:8px 0}
+    .inv-table th{background:#1a1a2e;color:#fff;padding:4px 5px;text-align:left;font-weight:700}
+    .inv-table td{padding:4px 5px;border-bottom:1px solid #eee}
+    .inv-totals{background:#f8f8f8;border-radius:6px;padding:8px;margin-top:6px}
+    .inv-trow{display:flex;justify-content:space-between;font-size:9px;margin-bottom:2px}
+    .inv-ttc{display:flex;justify-content:space-between;font-size:11px;font-weight:800;border-top:1px solid #ddd;padding-top:5px;margin-top:3px}
+    .inv-sigs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+    .inv-sig{border:1px dashed #ccc;border-radius:6px;padding:5px;text-align:center;min-height:55px}
 
     #install-banner{background:linear-gradient(135deg,var(--accent),#00AADD);padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:10px;border-radius:14px}
     #install-banner p{color:#fff;font-size:12px;font-weight:700;flex:1;margin:0}
@@ -195,14 +205,40 @@
     .quick-btn:active{transform:scale(.95)}
     .quick-icon{font-size:20px;line-height:1}
 
+    .stock-item{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:12px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px}
+    .stock-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+
     /* PRINT AREA */
     #print-area{display:none;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;color:#222;background:#fff;padding:20px 24px;max-width:210mm;margin:0 auto}
+    .pa-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #1a1a2e;padding-bottom:12px;margin-bottom:14px}
+    .pa-logo{width:52px;height:52px;border-radius:50%;object-fit:contain}
+    .pa-logo-txt{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#0088CC,#005FAA);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff}
+    .pa-doc-type{font-size:22px;font-weight:900;letter-spacing:.5px}
+    .pa-parties{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+    .pa-party{padding:10px;border-radius:6px;font-size:10px}
+    .pa-table{width:100%;border-collapse:collapse;font-size:10px;margin:10px 0}
+    .pa-table th{background:#1a1a2e;color:#fff;padding:6px 8px;text-align:left;font-weight:700}
+    .pa-table td{padding:6px 8px;border-bottom:1px solid #eee}
+    .pa-totals{background:#f8f8f8;border-radius:8px;padding:12px;margin-top:10px}
+    .pa-trow{display:flex;justify-content:space-between;padding:3px 0;font-size:10px}
+    .pa-ttc{display:flex;justify-content:space-between;font-size:14px;font-weight:900;border-top:1.5px solid #ddd;padding-top:8px;margin-top:4px}
+    .pa-sigs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+    .pa-sig-box{border:1px dashed #ccc;border-radius:8px;padding:8px;text-align:center;min-height:70px}
+    .pa-sig-img{width:100%;height:60px;object-fit:contain}
+    .pa-policy{background:#f8f8f8;border-left:4px solid #0088CC;padding:8px 12px;margin-top:12px;border-radius:0 6px 6px 0}
+    .pa-footer{margin-top:16px;padding-top:10px;border-top:1px solid #eee;font-size:9px;color:#aaa;text-align:center}
+    .pa-bilan-kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+    .pa-kpi{background:#f8f8f8;border-radius:8px;padding:12px;text-align:center}
+    .pa-kpi-val{font-size:20px;font-weight:900;color:#1a1a2e}
+    .pa-kpi-lbl{font-size:9px;color:#888;margin-top:2px}
+
     @page{size:A4;margin:10mm}
     @media print{
     *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
     html,body{background:#fff!important;height:auto!important}
     body>*:not(#print-area){display:none!important}
     #print-area{display:block!important;position:static!important;width:100%;max-width:none;padding:0;margin:0}
+    .pa-table tr,.pa-sigs,.pa-totals{page-break-inside:avoid}
     }
     </style>
 </head>
@@ -241,21 +277,11 @@
   </div>
 </div>
 
-<!-- ACCUEIL -->
+<!-- ══════════ ACCUEIL ══════════ -->
 <div class="screen active" id="screen-home">
   <div id="install-banner">
-    <div><p>Installer CJ Studios sur votre mobile</p><small>Nécessite un hébergement web (HTTP/HTTPS)</small></div>
+    <div><p>Installer CJ Studios sur votre mobile</p><small>Accès hors-ligne sans navigateur</small></div>
     <button class="install-btn" onclick="installApp()">Installer</button>
-  </div>
-
-  <!-- Alerte rappel sauvegarde (7 jours) -->
-  <div id="backup-reminder-banner" style="display:none;background:var(--amber-light);border:1px solid var(--amber);padding:10px 12px;border-radius:12px;margin-bottom:10px;align-items:center;gap:10px">
-    <span style="font-size:20px">⚠️</span>
-    <div style="flex:1">
-      <p style="font-size:11px;font-weight:700;color:var(--text);margin:0">Rappel de sauvegarde</p>
-      <small style="color:var(--muted)">Plus de 7 jours sans export Excel/JSON. Pensez à sauvegarder vos données !</small>
-    </div>
-    <button class="btn btn-sm" style="background:var(--amber);color:#fff" onclick="openSettings()">Sauvegarder</button>
   </div>
 
   <div class="stat-grid">
@@ -312,7 +338,7 @@
   </div>
 </div>
 
-<!-- FACTURES -->
+<!-- ══════════ FACTURES ══════════ -->
 <div class="screen" id="screen-invoices">
   <div style="background:var(--primary);margin:-12px -12px 12px">
     <div class="dtype-tabs">
@@ -377,6 +403,7 @@
 
     <div class="section"><div class="sec-head"><span class="sec-title">🧾 Taxes applicables</span><span class="badge b-purple">Optionnel</span></div>
       <div class="sec-body">
+        <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Cochez les taxes à appliquer sur ce document</p>
         <div id="tax-list"></div>
         <button class="btn btn-outline btn-sm" onclick="addCustomTax()" style="margin-top:8px;color:var(--accent);border-color:var(--accent)">+ Ajouter une taxe personnalisée</button>
         <div id="custom-tax-form" style="display:none;margin-top:10px;background:var(--bg);border-radius:10px;padding:10px">
@@ -397,15 +424,15 @@
         <div style="display:flex;flex-direction:column;gap:8px">
           <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--accent);cursor:pointer;background:var(--accent-light)" id="liv-opt-none">
             <input type="radio" name="livraison" value="none" checked onchange="updateLivraison()" style="accent-color:var(--accent);width:16px;height:16px">
-            <div><p style="font-size:13px;font-weight:700;color:var(--text);margin:0">Sans livraison</p></div>
+            <div><p style="font-size:13px;font-weight:700;color:var(--text);margin:0">Sans livraison</p><p style="font-size:10px;color:var(--muted);margin:0">Remise en mains propres ou non applicable</p></div>
           </label>
           <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;background:var(--bg)" id="liv-opt-free">
             <input type="radio" name="livraison" value="free" onchange="updateLivraison()" style="accent-color:var(--accent);width:16px;height:16px">
-            <div><p style="font-size:13px;font-weight:700;color:var(--green);margin:0">🎁 Livraison offerte</p></div>
+            <div><p style="font-size:13px;font-weight:700;color:var(--green);margin:0">🎁 Livraison offerte</p><p style="font-size:10px;color:var(--muted);margin:0">Frais pris en charge par l'agence</p></div>
           </label>
           <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;background:var(--bg)" id="liv-opt-paid">
             <input type="radio" name="livraison" value="paid" onchange="updateLivraison()" style="accent-color:var(--accent);width:16px;height:16px">
-            <div style="flex:1"><p style="font-size:13px;font-weight:700;color:var(--text);margin:0">Frais de livraison facturés</p></div>
+            <div style="flex:1"><p style="font-size:13px;font-weight:700;color:var(--text);margin:0">Frais de livraison facturés</p><p style="font-size:10px;color:var(--muted);margin:0">Montant ajouté au total</p></div>
           </label>
         </div>
         <div id="liv-montant-wrap" style="display:none;margin-top:10px">
@@ -460,7 +487,7 @@
   </div>
 </div>
 
-<!-- BON DE COMMANDE -->
+<!-- ══════════ BON DE COMMANDE ══════════ -->
 <div class="screen" id="screen-orders">
   <div style="background:var(--primary);margin:-12px -12px 12px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
     <div>
@@ -477,6 +504,12 @@
         <div class="fg half"><label class="lbl">Adresse</label><input class="fi" id="bc-adr" placeholder="Adresse du client"></div>
       </div></div>
     </div>
+    <div class="section"><div class="sec-head"><span class="sec-title">🏭 Fournisseur</span></div>
+      <div class="sec-body"><div class="form-row">
+        <div class="fg half"><label class="lbl">Nom fournisseur</label><input class="fi" id="bc-fourn" placeholder="Nom du fournisseur"></div>
+        <div class="fg half"><label class="lbl">Contact</label><input class="fi" id="bc-fourn-tel" placeholder="+237 6XX XXX XXX"></div>
+      </div></div>
+    </div>
     <div class="section"><div class="sec-head"><span class="sec-title">📦 Articles</span></div>
       <div class="sec-body"><div id="bc-lignes"></div>
         <button class="btn btn-outline btn-sm" onclick="addBCLigne()">+ Ajouter</button>
@@ -488,15 +521,28 @@
       <hr class="t-sep">
       <div class="t-row big"><span>TOTAL TTC</span><span class="tv" id="bc-ttc">0 FCFA</span></div>
     </div>
+    <div class="section"><div class="sec-head"><span class="sec-title">✍️ Signatures</span></div>
+      <div class="sec-body">
+        <div class="sig-wrap">
+          <div><p class="sig-label">Agence</p><canvas id="sig-bc-a" class="sig-canvas" width="180" height="75"></canvas><p class="sig-hint">✏️ Signez</p></div>
+          <div><p class="sig-label">Client *</p><canvas id="sig-bc-c" class="sig-canvas" width="180" height="75"></canvas><p class="sig-hint" id="sih-bc">✏️ Signez</p></div>
+        </div>
+        <div class="sig-clear">
+          <button class="btn btn-sm btn-outline" style="color:var(--red);border-color:var(--red)" onclick="clearSig('sig-bc-a',null,()=>sigBCA=null)">Effacer agence</button>
+          <button class="btn btn-sm btn-outline" style="color:var(--red);border-color:var(--red)" onclick="clearSig('sig-bc-c','sih-bc',()=>sigBCC=null)">Effacer client</button>
+        </div>
+      </div>
+    </div>
     <button class="btn btn-dark" onclick="submitBC()">Enregistrer le bon de commande</button>
   </div>
   <div id="bc-success" style="display:none" class="success-screen">
     <span class="success-icon">✅</span><h2 class="success-title">Bon enregistré !</h2>
+    <p class="success-sub" id="bc-succ-sub"></p>
     <button class="btn btn-success" onclick="resetScreen('orders')">Nouveau bon</button>
   </div>
 </div>
 
-<!-- BON DE LIVRAISON -->
+<!-- ══════════ BON DE LIVRAISON ══════════ -->
 <div class="screen" id="screen-delivery">
   <div style="background:var(--primary);margin:-12px -12px 12px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
     <div>
@@ -510,6 +556,14 @@
       <div class="sec-body"><div class="form-row">
         <div class="fg"><label class="lbl">Client *</label><input class="fi" id="bl-nom" placeholder="Nom du client"></div>
         <div class="fg half"><label class="lbl">Téléphone</label><input class="fi" id="bl-tel" placeholder="+237 6XX XXX XXX"></div>
+        <div class="fg half"><label class="lbl">Réf. BC</label><input class="fi" id="bl-ref" placeholder="BC-2026-0001"></div>
+        <div class="fg"><label class="lbl">Adresse livraison</label><input class="fi" id="bl-adr" placeholder="Adresse du client"></div>
+      </div></div>
+    </div>
+    <div class="section"><div class="sec-head"><span class="sec-title">🚚 Livreur</span></div>
+      <div class="sec-body"><div class="form-row">
+        <div class="fg half"><label class="lbl">Nom</label><input class="fi" id="bl-livreur" placeholder="Nom du livreur"></div>
+        <div class="fg half"><label class="lbl">Téléphone</label><input class="fi" id="bl-livreur-tel" placeholder="+237 6XX XXX XXX"></div>
       </div></div>
     </div>
     <div class="section"><div class="sec-head"><span class="sec-title">📋 Articles</span></div>
@@ -517,15 +571,28 @@
         <button class="btn btn-outline btn-sm" onclick="addBLArticle()">+ Ajouter</button>
       </div>
     </div>
+    <div class="section"><div class="sec-head"><span class="sec-title">✍️ Signatures</span></div>
+      <div class="sec-body">
+        <div class="sig-wrap">
+          <div><p class="sig-label">Livreur</p><canvas id="sig-bl-a" class="sig-canvas" width="180" height="75"></canvas><p class="sig-hint">✏️ Signez</p></div>
+          <div><p class="sig-label">Réceptionnaire *</p><canvas id="sig-bl-c" class="sig-canvas" width="180" height="75"></canvas><p class="sig-hint" id="sih-bl">✏️ Signez</p></div>
+        </div>
+        <div class="sig-clear">
+          <button class="btn btn-sm btn-outline" style="color:var(--red);border-color:var(--red)" onclick="clearSig('sig-bl-a',null,()=>sigBLA=null)">Effacer livreur</button>
+          <button class="btn btn-sm btn-outline" style="color:var(--red);border-color:var(--red)" onclick="clearSig('sig-bl-c','sih-bl',()=>sigBLC=null)">Effacer réceptionnaire</button>
+        </div>
+      </div>
+    </div>
     <button class="btn btn-dark" onclick="submitBL()">Valider la livraison</button>
   </div>
   <div id="bl-success" style="display:none" class="success-screen">
     <span class="success-icon">🚚</span><h2 class="success-title">Livraison confirmée !</h2>
+    <p class="success-sub" id="bl-succ-sub"></p>
     <button class="btn" style="background:var(--pink);color:#fff" onclick="resetScreen('delivery')">Nouveau bon</button>
   </div>
 </div>
 
-<!-- REÇU DE PAIEMENT -->
+<!-- ══════════ REÇU DE PAIEMENT ══════════ -->
 <div class="screen" id="screen-receipt">
   <div style="background:var(--primary);margin:-12px -12px 10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
     <div>
@@ -535,30 +602,77 @@
     <div id="rc-header-logo"></div>
   </div>
   <div id="rc-form">
+    <div id="rc-statut-bar" style="background:var(--red-light);padding:8px 14px;margin:-10px -12px 12px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:11px;color:var(--muted);font-weight:700">Statut du paiement</span>
+      <span id="rc-statut-badge" class="badge b-red">Non payé</span>
+    </div>
+    <div class="section"><div class="sec-head"><span class="sec-title">🔗 Réf. facture</span></div>
+      <div class="sec-body"><input class="fi" id="rc-ref" placeholder="Référence facture"></div>
+    </div>
     <div class="section"><div class="sec-head"><span class="sec-title">👤 Client</span></div>
       <div class="sec-body"><div class="form-row">
         <div class="fg"><label class="lbl">Nom / Société *</label><input class="fi" id="rc-nom" placeholder="Nom du client"></div>
+        <div class="fg half"><label class="lbl">Téléphone</label><input class="fi" id="rc-tel" placeholder="+237 6XX XXX XXX"></div>
+        <div class="fg half"><label class="lbl">Email</label><input class="fi" id="rc-email" placeholder="email@client.cm"></div>
       </div></div>
     </div>
     <div class="section"><div class="sec-head"><span class="sec-title">💵 Paiement</span></div>
       <div class="sec-body"><div class="form-row">
-        <div class="fg"><label class="lbl">Montant reçu (FCFA) *</label><input class="fi" type="number" id="rc-recu" value="0" min="0"></div>
+        <div class="fg"><label class="lbl">Montant total facture (FCFA)</label><input class="fi" type="number" id="rc-total" value="0" min="0" oninput="updateRcStatut()"></div>
+        <div class="fg"><label class="lbl">Montant reçu (FCFA) *</label><input class="fi" type="number" id="rc-recu" value="0" min="0" oninput="updateRcStatut()"></div>
+        <div class="fg"><label class="lbl">Mode de paiement</label>
+          <select class="fi" id="rc-mode"><option>Espèces</option><option>Virement bancaire</option><option>Mobile Money MTN</option><option>Mobile Money Orange</option><option>Chèque</option></select>
+        </div>
+        <div class="fg"><label class="lbl">Réf. transaction</label><input class="fi" id="rc-txn" placeholder="Référence de la transaction"></div>
+      </div>
+      <div style="background:var(--bg);border-radius:10px;padding:12px;margin-top:10px">
+        <div class="t-row"><span>Montant facture</span><span class="tv" id="rc-disp-total">0 FCFA</span></div>
+        <div class="t-row"><span>Montant reçu</span><span class="tv" id="rc-disp-recu" style="color:var(--green)">0 FCFA</span></div>
+        <div class="t-row" id="rc-trop-row" style="display:none"><span>Monnaie à rendre</span><span class="tv" id="rc-disp-trop" style="color:var(--amber)">0 FCFA</span></div>
+        <hr class="t-sep">
+        <div class="t-row big"><span>Reste dû</span><span class="tv" id="rc-disp-reste" style="color:var(--red)">0 FCFA</span></div>
       </div></div>
+    </div>
+    <div class="section"><div class="sec-head"><span class="sec-title">✍️ Signatures</span></div>
+      <div class="sec-body">
+        <div class="sig-wrap">
+          <div><p class="sig-label">Caissier</p><canvas id="sig-rc-a" class="sig-canvas" width="180" height="75"></canvas><p class="sig-hint">✏️ Signez</p></div>
+          <div><p class="sig-label">Client *</p><canvas id="sig-rc-c" class="sig-canvas" width="180" height="75"></canvas><p class="sig-hint" id="sih-rc">✏️ Signez</p></div>
+        </div>
+        <div class="sig-clear">
+          <button class="btn btn-sm btn-outline" style="color:var(--red);border-color:var(--red)" onclick="clearSig('sig-rc-a',null,()=>sigRCA=null)">Effacer caissier</button>
+          <button class="btn btn-sm btn-outline" style="color:var(--red);border-color:var(--red)" onclick="clearSig('sig-rc-c','sih-rc',()=>sigRCC=null)">Effacer client</button>
+        </div>
+      </div>
     </div>
     <button class="btn btn-dark" onclick="submitRC()">Émettre le reçu de paiement</button>
   </div>
   <div id="rc-success" style="display:none" class="success-screen">
     <span class="success-icon">💰</span><h2 class="success-title">Paiement enregistré !</h2>
+    <p class="success-sub" id="rc-succ-sub"></p>
+    <div class="success-card">
+      <div class="sc-row"><span class="sc-label">Client</span><span class="sc-val" id="rc-succ-cl"></span></div>
+      <div class="sc-row"><span class="sc-label">Mode</span><span class="sc-val" id="rc-succ-mode"></span></div>
+      <div class="sc-row"><span class="sc-label">Reçu</span><span class="sc-val" id="rc-succ-recu" style="color:var(--green)"></span></div>
+      <div class="sc-row"><span class="sc-label">Reste dû</span><span class="sc-val" id="rc-succ-reste"></span></div>
+    </div>
     <button class="btn" style="background:var(--amber);color:#fff" onclick="resetScreen('receipt')">Nouveau reçu</button>
   </div>
 </div>
 
-<!-- STOCK -->
+<!-- ══════════ STOCK ══════════ -->
 <div class="screen" id="screen-stock">
   <div style="background:var(--primary);margin:-12px -12px 10px">
     <div style="padding:11px 16px;display:flex;justify-content:space-between;align-items:center">
-      <div><p style="color:#fff;font-weight:800;font-size:13px;margin:0">Gestion des Stocks</p></div>
+      <div><p style="color:#fff;font-weight:800;font-size:13px;margin:0">Gestion des Stocks</p>
+        <p style="color:rgba(255,255,255,.4);font-size:9px;margin:0"><span id="stock-agency-lbl">CJ Studios</span> · <span id="stock-date-lbl"></span></p>
+      </div>
+      <div style="text-align:right">
+        <p style="color:rgba(255,255,255,.4);font-size:9px;margin:0">Valeur totale</p>
+        <p id="stock-valeur" style="color:#00AADD;font-weight:800;font-size:13px;margin:0">0 FCFA</p>
+      </div>
     </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.07)" id="stock-stats-bar"></div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr)">
       <button class="dtype-btn active" id="st-tab-list" onclick="switchStockTab('list')">📦 Stock</button>
       <button class="dtype-btn" id="st-tab-mouv" onclick="switchStockTab('mouv')">🔄 Mouvements</button>
@@ -567,45 +681,124 @@
   </div>
   <div id="st-screen-list">
     <input id="stock-search" class="fi" placeholder="🔍 Rechercher..." oninput="renderStock()" style="margin-bottom:10px">
+    <div id="stock-filters" style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+      <button class="btn btn-sm" data-f="Tous" onclick="setStockFilter('Tous')">Tous</button>
+      <button class="btn btn-sm" data-f="Alerte" onclick="setStockFilter('Alerte')">⚠ Alerte</button>
+      <button class="btn btn-sm" data-f="OK" onclick="setStockFilter('OK')">✅ OK</button>
+    </div>
     <div id="stock-list"></div>
   </div>
   <div id="st-screen-mouv" style="display:none">
     <div class="section"><div class="sec-head"><span class="sec-title">🔄 Enregistrer un mouvement</span></div>
-      <div class="sec-body"><button class="btn btn-success" onclick="appliquerMouvement()">Enregistrer</button></div>
+      <div class="sec-body">
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <button id="mouv-in-btn" onclick="setMouvType('Entrée')" class="btn" style="background:var(--green-light);color:var(--green);border:2px solid var(--green)">📥 Entrée</button>
+          <button id="mouv-out-btn" onclick="setMouvType('Sortie')" class="btn" style="background:var(--bg);color:var(--muted);border:2px solid var(--border)">📤 Sortie</button>
+        </div>
+        <div class="form-row">
+          <div class="fg"><label class="lbl">Article *</label>
+            <select class="fi" id="mouv-article" onchange="updateMouvInfo()"><option value="">-- Sélectionner --</option></select>
+          </div>
+          <div class="fg half"><label class="lbl">Quantité</label><input class="fi" type="number" id="mouv-qte" value="1" min="1"></div>
+          <div class="fg half" id="mouv-actuel-wrap" style="display:none">
+            <label class="lbl">Stock actuel</label><input class="fi" id="mouv-actuel" readonly>
+          </div>
+          <div class="fg"><label class="lbl">Note</label><input class="fi" id="mouv-note" placeholder="Motif du mouvement de stock"></div>
+        </div>
+        <button class="btn btn-success" id="mouv-submit-btn" onclick="appliquerMouvement()" style="margin-top:10px">📥 Enregistrer l'entrée</button>
+      </div>
+    </div>
+    <div class="section"><div class="sec-head"><span class="sec-title">📋 Historique</span><span id="mouv-count" class="badge b-purple">0</span></div>
+      <div class="sec-body" style="padding:8px 13px"><div id="mouv-history"></div></div>
     </div>
   </div>
   <div id="st-screen-add" style="display:none">
     <div class="section"><div class="sec-head"><span class="sec-title">➕ Nouvel article</span></div>
-      <div class="sec-body">
-        <div class="form-row">
-          <div class="fg"><label class="lbl">Nom de l'article *</label><input class="fi" id="na-nom"></div>
+      <div class="sec-body"><div class="form-row">
+        <div class="fg"><label class="lbl">Nom de l'article *</label><input class="fi" id="na-nom" placeholder="Nom de l'article à ajouter"></div>
+        <div class="fg half"><label class="lbl">Catégorie</label>
+          <select class="fi" id="na-cat"><option>Impression</option><option>Design</option><option>Signalétique</option><option>Consommables</option><option>Matériel</option><option>Autre</option></select>
         </div>
-        <button class="btn btn-success" onclick="ajouterArticle()" style="margin-top:12px">✅ Ajouter</button>
+        <div class="fg half"><label class="lbl">Unité</label>
+          <select class="fi" id="na-unite"><option>Unité</option><option>Rame</option><option>m²</option><option>Litre</option><option>Cartouche</option><option>Rouleau</option><option>Lot</option></select>
+        </div>
+        <div class="fg third"><label class="lbl">Quantité</label><input class="fi" type="number" id="na-qte" value="0" min="0"></div>
+        <div class="fg third"><label class="lbl">Stock min.</label><input class="fi" type="number" id="na-min" value="5" min="0"></div>
+        <div class="fg third"><label class="lbl">P.U. (FCFA)</label><input class="fi" type="number" id="na-pu" value="0" min="0"></div>
+      </div>
+      <button class="btn btn-success" onclick="ajouterArticle()" style="margin-top:12px">✅ Ajouter au stock</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- RAPPORTS -->
+<!-- ══════════ RAPPORTS ══════════ -->
 <div class="screen" id="screen-reports">
   <div style="background:var(--primary);margin:-12px -12px 12px;padding:12px 16px">
     <p style="color:#00AADD;font-weight:800;font-size:15px;margin:0 0 2px">📊 Bilans & Rapports</p>
+    <p style="color:rgba(255,255,255,.4);font-size:10px;margin:0">Factures uniquement (hors devis et reçus)</p>
   </div>
   <div class="stat-grid">
-    <div class="stat-card" style="border-left:3px solid var(--green)"><p class="stat-label">CA HT</p><p class="stat-val" id="rep-ht">0</p></div>
-    <div class="stat-card" style="border-left:3px solid var(--accent)"><p class="stat-label">Total TTC</p><p class="stat-val" id="rep-ttc">0</p></div>
-  </div>
-  <button class="btn btn-success" onclick="exportBilanPDF()" style="margin-top:4px">📊 Exporter le bilan en PDF</button>
-</div>
-
-<!-- AGENDA -->
-<div class="screen" id="screen-agenda">
-  <div style="background:var(--primary);margin:-12px -12px 12px;padding:12px 16px">
-    <p style="color:#00AADD;font-weight:800;font-size:15px;margin:0">📅 Agenda</p>
-    <button onclick="openNewEvent()" style="background:#0088CC;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;margin-top:8px">+ Nouveau</button>
+    <div class="stat-card" style="border-left:3px solid var(--green)"><p class="stat-label">CA HT</p><p class="stat-val" id="rep-ht">0</p><p class="stat-sub">FCFA</p></div>
+    <div class="stat-card" style="border-left:3px solid var(--accent)"><p class="stat-label">Total TTC</p><p class="stat-val" id="rep-ttc">0</p><p class="stat-sub">FCFA</p></div>
+    <div class="stat-card" style="border-left:3px solid var(--pink)"><p class="stat-label">Taxes collectées</p><p class="stat-val" id="rep-tva">0</p><p class="stat-sub">FCFA</p></div>
+    <div class="stat-card" style="border-left:3px solid var(--amber)"><p class="stat-label">Nb. factures</p><p class="stat-val" id="rep-nb">0</p><p class="stat-sub">factures émises</p></div>
   </div>
   <div class="card">
-    <div class="card-head"><span class="card-title">📋 Événements</span></div>
+    <div class="card-head"><span class="card-title">📈 Évolution des ventes</span></div>
+    <div class="card-body"><div class="bar-chart" id="report-chart"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">📋 Documents émis</span></div>
+    <div class="card-body" style="padding:8px 13px"><div id="rep-docs-list"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">🏬 Résumé du stock</span></div>
+    <div class="card-body">
+      <div class="t-row"><span>Articles en stock</span><span class="tv" id="rep-stock-count">0</span></div>
+      <div class="t-row"><span>Valeur totale stock</span><span class="tv" id="rep-stock-val">0 FCFA</span></div>
+      <div class="t-row"><span>Articles en alerte</span><span class="tv" id="rep-stock-alerte" style="color:var(--red)">0</span></div>
+    </div>
+  </div>
+  <button class="btn btn-success" onclick="exportBilanPDF()" style="margin-top:4px">📊 Exporter le bilan en PDF</button>
+  <button class="btn btn-outline" onclick="openDocs()" style="margin-top:8px">📁 Voir tous les documents enregistrés</button>
+</div>
+
+<!-- ══════════ AGENDA ══════════ -->
+<div class="screen" id="screen-agenda">
+  <div style="background:var(--primary);margin:-12px -12px 12px">
+    <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <p style="color:#00AADD;font-weight:800;font-size:15px;margin:0">📅 Agenda</p>
+        <p style="color:rgba(255,255,255,.4);font-size:9px;margin:0">Échéances · Livraisons · Paiements · RDV</p>
+      </div>
+      <button onclick="openNewEvent()" style="background:#0088CC;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">+ Nouveau</button>
+    </div>
+    <div style="padding:0 16px 12px;display:flex;align-items:center;justify-content:space-between">
+      <button onclick="navMonth(-1)" style="background:rgba(255,255,255,.1);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px">‹</button>
+      <p id="cal-month-label" style="color:#fff;font-weight:700;font-size:14px;margin:0"></p>
+      <button onclick="navMonth(1)" style="background:rgba(255,255,255,.1);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px">›</button>
+    </div>
+    <div style="padding:0 12px 10px">
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;text-align:center;font-size:9px;color:rgba(255,255,255,.4);font-weight:700">
+        <div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div><div>D</div>
+      </div>
+      <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px"></div>
+    </div>
+  </div>
+
+  <div id="agenda-filters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+    <button class="btn btn-sm" data-f="all" onclick="setAgFilter('all')">Tous</button>
+    <button class="btn btn-sm" data-f="echeance" onclick="setAgFilter('echeance')">💰 Échéances</button>
+    <button class="btn btn-sm" data-f="livraison" onclick="setAgFilter('livraison')">🚚 Livraisons</button>
+    <button class="btn btn-sm" data-f="rdv" onclick="setAgFilter('rdv')">📌 RDV</button>
+    <button class="btn btn-sm" data-f="paiement" onclick="setAgFilter('paiement')">💳 Paiements</button>
+  </div>
+
+  <div id="agenda-urgents" style="margin-bottom:10px"></div>
+
+  <div class="card">
+    <div class="card-head"><span class="card-title">📋 Tous les événements</span><span id="agenda-count" class="badge b-blue">0</span></div>
     <div class="card-body" style="padding:8px 13px"><div id="agenda-list"></div></div>
   </div>
 </div>
@@ -614,11 +807,40 @@
 <div class="modal-overlay" id="event-overlay" onclick="if(event.target.id==='event-overlay')closeNewEvent()">
   <div class="modal">
     <div class="modal-handle"></div>
-    <p class="modal-title">📅 Nouvel événement</p>
+    <p class="modal-title" id="event-modal-title">📅 Nouvel événement</p>
     <div class="form-row">
-      <div class="fg"><label class="lbl">Titre *</label><input class="fi" id="ev-titre"></div>
+      <div class="fg"><label class="lbl">Titre *</label><input class="fi" id="ev-titre" placeholder="ex: Paiement client, Livraison commande..."></div>
+      <div class="fg half">
+        <label class="lbl">Type</label>
+        <select class="fi" id="ev-type">
+          <option value="echeance">💰 Échéance facture</option>
+          <option value="livraison">🚚 Livraison</option>
+          <option value="paiement">💳 Paiement reçu</option>
+          <option value="rdv">📌 RDV client</option>
+          <option value="autre">📅 Autre</option>
+        </select>
+      </div>
+      <div class="fg half"><label class="lbl">Date *</label><input class="fi" type="date" id="ev-date"></div>
+      <div class="fg half"><label class="lbl">Heure</label><input class="fi" type="time" id="ev-heure"></div>
+      <div class="fg half">
+        <label class="lbl">Priorité</label>
+        <select class="fi" id="ev-priorite">
+          <option value="normale">🟢 Normale</option>
+          <option value="haute">🟡 Haute</option>
+          <option value="urgente">🔴 Urgente</option>
+        </select>
+      </div>
+      <div class="fg"><label class="lbl">Client / Contact</label><input class="fi" id="ev-client" placeholder="Client ou contact concerné"></div>
+      <div class="fg"><label class="lbl">Montant lié (FCFA)</label><input class="fi" type="number" id="ev-montant" placeholder="0" min="0"></div>
+      <div class="fg"><label class="lbl">Note</label><textarea class="fi" id="ev-note" rows="2" placeholder="Notes ou informations complémentaires"></textarea></div>
     </div>
-    <button class="btn btn-primary" onclick="saveEvent()" style="margin-top:12px">Enregistrer</button>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-outline" onclick="closeNewEvent()" style="flex:1">Annuler</button>
+      <button class="btn btn-primary" onclick="saveEvent()" style="flex:2" id="ev-save-btn">Enregistrer</button>
+    </div>
+    <div id="ev-delete-wrap" style="display:none;margin-top:8px">
+      <button class="btn btn-outline" onclick="deleteCurrentEvent()" style="color:var(--red);border-color:var(--red)">🗑 Supprimer cet événement</button>
+    </div>
   </div>
 </div>
 
@@ -627,37 +849,93 @@
   <button class="nav-btn active" id="nav-home" onclick="goScreen('home')"><span class="nav-icon">🏠</span><span class="nav-label">Accueil</span><div class="nav-bar-ind"></div></button>
   <button class="nav-btn" id="nav-invoices" onclick="goScreen('invoices')"><span class="nav-icon"><i class="fa-solid fa-file-invoice"></i></span><span class="nav-label">Factures</span><div class="nav-bar-ind"></div></button>
   <button class="nav-btn" id="nav-orders" onclick="goScreen('orders')"><span class="nav-icon"><i class="fa-solid fa-cart-shopping"></i></span><span class="nav-label">Bons</span><div class="nav-bar-ind"></div></button>
-  <button class="nav-btn" id="nav-stock" onclick="goScreen('stock')"><span class="nav-icon"><i class="fa-solid fa-boxes-stacked"></i></span><span class="nav-label">Stock</span><div class="nav-bar-ind"></div></button>
+  <button class="nav-btn" id="nav-stock" onclick="goScreen('stock')"><span class="nav-icon"><i class="fa-solid fa-boxes-stacked" ></i></span><span class="nav-label">Stock</span><div class="nav-bar-ind"></div></button>
   <button class="nav-btn" id="nav-agenda" onclick="goScreen('agenda')"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="nav-label">Agenda</span><div class="nav-bar-ind"></div></button>
   <button class="nav-btn" id="nav-reports" onclick="goScreen('reports')"><span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span><span class="nav-label">Bilans</span><div class="nav-bar-ind"></div></button>
 </nav>
 
-<!-- SETTINGS MODAL -->
+<!-- ══════════ SETTINGS MODAL ══════════ -->
 <div class="modal-overlay" id="settings-overlay" onclick="if(event.target.id==='settings-overlay')closeSettings()">
   <div class="modal" id="settings-modal">
     <div class="modal-handle"></div>
-    <p class="modal-title">⚙️ Paramètres de l'agence</p>
+    <p class="modal-title"> Paramètres de l'agence</p>
+
+    <div class="section"><div class="sec-head"><span class="sec-title"> Logo de l'agence</span></div>
+      <div class="sec-body" style="display:flex;align-items:center;gap:14px">
+        <div style="width:70px;height:70px;border-radius:50%;overflow:hidden;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#fff">
+          <img id="logo-preview" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain;border-radius:50%">
+          <span id="logo-preview-txt" style="color:var(--primary);font-weight:800;font-size:18px">CJS</span>
+        </div>
+        <div style="flex:1">
+          <p style="font-size:12px;color:var(--muted);margin-bottom:8px">PNG ou JPG, fond transparent préférable</p>
+          <label style="display:inline-block;padding:8px 14px;background:var(--accent-light);color:#3C3489;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">
+            📁 Choisir un logo
+            <input type="file" accept="image/*" style="display:none" onchange="uploadLogo(this)">
+          </label>
+          <button onclick="removeLogo()" style="margin-left:8px;font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;font-family:inherit">Supprimer</button>
+        </div>
+      </div>
+    </div>
 
     <div class="section"><div class="sec-head"><span class="sec-title">🏢 Informations de l'agence</span></div>
       <div class="sec-body"><div class="form-row">
         <div class="fg"><label class="lbl">Nom de l'agence</label><input class="fi" id="set-agency-name" value="CJ Studios" oninput="applySettings()"></div>
+        <div class="fg half"><label class="lbl">Téléphone *</label><input class="fi" id="set-phone" placeholder="+237 6XX XXX XXX" oninput="applySettings()"></div>
+        <div class="fg half"><label class="lbl">Email</label><input class="fi" id="set-email" placeholder="email@votre-agence.cm" oninput="applySettings()"></div>
+        <div class="fg"><label class="lbl">Adresse</label><input class="fi" id="set-address" value="Yaoundé, Cameroun" oninput="applySettings()"></div>
+        <div class="fg half"><label class="lbl">NIU agence</label><input class="fi" id="set-niu" placeholder="NIU de votre agence" oninput="applySettings()"></div>
+        <div class="fg half"><label class="lbl">RC commerce</label><input class="fi" id="set-rc" placeholder="N° Registre de commerce" oninput="applySettings()"></div>
       </div></div>
     </div>
 
-    <!-- Sauvegarde & Restauration Excel / JSON -->
-    <div class="section"><div class="sec-head"><span class="sec-title">💾 Sauvegarde & Restauration</span></div>
+    <div class="section"><div class="sec-head"><span class="sec-title">🎨 Couleur des documents</span></div>
       <div class="sec-body">
-        <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Sauvegardez vos données en Excel (multifeuilles) ou en JSON.</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-          <button class="btn btn-outline btn-sm" style="flex:1" onclick="exportExcel()">📊 Exporter Excel</button>
-          <label class="btn btn-outline btn-sm" style="flex:1;cursor:pointer">📂 Importer Excel<input type="file" accept=".xlsx, .xls" style="display:none" onchange="importExcel(this)"></label>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Couleur principale de vos factures, devis et bons</p>
+        <div class="color-grid" id="color-grid"></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:12px">
+          <label style="font-size:11px;color:var(--muted)">Couleur personnalisée :</label>
+          <input type="color" id="custom-color" value="#0088CC" onchange="setInvoiceColor(this.value,null)" style="width:40px;height:36px;border:none;border-radius:8px;cursor:pointer;padding:2px">
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-outline btn-sm" style="flex:1" onclick="exportBackup()">⬇ Exporter JSON</button>
-          <label class="btn btn-outline btn-sm" style="flex:1;cursor:pointer">⬆ Importer JSON<input type="file" accept="application/json" style="display:none" onchange="importBackup(this)"></label>
+      </div>
+    </div>
+
+    <div class="section"><div class="sec-head"><span class="sec-title">🧾 Taxes par défaut</span></div>
+      <div class="sec-body">
+        <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Pré-cochées sur chaque nouveau document (modifiables par document).</p>
+        <div id="default-taxes-list"></div>
+        <button class="btn btn-outline btn-sm" onclick="addDefaultTax()" style="margin-top:8px;color:var(--accent);border-color:var(--accent)">+ Ajouter une taxe</button>
+        <div id="default-tax-form" style="display:none;margin-top:10px;background:var(--bg);border-radius:10px;padding:10px">
+          <div class="form-row">
+            <div class="fg half"><label class="lbl">Nom</label><input class="fi" id="dtax-name" placeholder="Nom de la taxe"></div>
+            <div class="fg half"><label class="lbl">Taux (%)</label><input class="fi" type="number" id="dtax-rate" placeholder="ex: 19.25" min="0" step="any"></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn btn-primary btn-sm" onclick="saveDefaultTax()" style="flex:1">Ajouter</button>
+            <button class="btn btn-outline btn-sm" onclick="$('default-tax-form').style.display='none'" style="flex:1">Annuler</button>
+          </div>
         </div>
-        <div style="margin-top:10px">
-          <button class="btn btn-primary btn-sm" style="width:100%" onclick="autoSaveFile()">💾 Sauvegarde automatique (Chrome/Edge Bureau)</button>
+      </div>
+    </div>
+
+    <div class="section"><div class="sec-head"><span class="sec-title">📜 Politique commerciale</span></div>
+      <div class="sec-body">
+        <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Apparaît en bas de vos documents.</p>
+        <textarea class="fi" id="set-policy" rows="5" placeholder="Ex: Paiement à 30 jours — Pénalités de retard 1,5%/mois..." oninput="applySettings()"></textarea>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+          <button class="btn btn-sm btn-outline" onclick="insertPolicy('Paiement à 30 jours date de facture.')" style="font-size:10px">⏱ 30 jours</button>
+          <button class="btn btn-sm btn-outline" onclick="insertPolicy('Tout retard de paiement entraîne des pénalités de 1,5% par mois.')" style="font-size:10px">⚠ Pénalités</button>
+          <button class="btn btn-sm btn-outline" onclick="insertPolicy('Escompte de 2% pour paiement comptant.')" style="font-size:10px">💰 Escompte</button>
+          <button class="btn btn-sm btn-outline" onclick="insertPolicy('Règlement des litiges : Tribunal de Commerce de Yaoundé.')" style="font-size:10px">⚖ Litiges</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section"><div class="sec-head"><span class="sec-title">💾 Sauvegarde des données</span></div>
+      <div class="sec-body">
+        <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Les données sont stockées sur cet appareil. Exportez-les régulièrement.</p>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" style="flex:1" onclick="exportBackup()">⬇ Exporter</button>
+          <label class="btn btn-outline btn-sm" style="flex:1;cursor:pointer">⬆ Importer<input type="file" accept="application/json" style="display:none" onchange="importBackup(this)"></label>
         </div>
       </div>
     </div>
@@ -666,148 +944,230 @@
   </div>
 </div>
 
-<!-- DOCUMENTS MODAL -->
+<!-- ══════════ DOCUMENTS MODAL ══════════ -->
 <div class="modal-overlay" id="docs-overlay" onclick="if(event.target.id==='docs-overlay')closeDocs()">
   <div class="modal" id="docs-modal" style="max-height:95vh">
     <div class="modal-handle"></div>
-    <p class="modal-title" style="margin:0">📁 Mes Documents</p>
-    <div id="docs-list" style="max-height:50vh;overflow-y:auto;margin-top:10px"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <p class="modal-title" style="margin:0">📁 Mes Documents</p>
+      <button onclick="exportBilanPDF()" style="background:var(--green-light);color:var(--green);border:1px solid var(--green);border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">📊 Bilan PDF</button>
+    </div>
+    <div id="docs-filters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+      <button class="btn btn-sm" data-f="all" onclick="setDocFilter('all')">Tous</button>
+      <button class="btn btn-sm" data-f="FACTURE" onclick="setDocFilter('FACTURE')"><i class="fa-solid fa-file-invoice"></i> Factures</button>
+      <button class="btn btn-sm" data-f="DEVIS" onclick="setDocFilter('DEVIS')">📋 Devis</button>
+      <button class="btn btn-sm" data-f="BC" onclick="setDocFilter('BC')"><i class="fa-solid fa-cart-shopping"></i> Bons cmd.</button>
+      <button class="btn btn-sm" data-f="BL" onclick="setDocFilter('BL')"><i class="fa-solid fa-truck"></i> Livraisons</button>
+      <button class="btn btn-sm" data-f="REÇU" onclick="setDocFilter('REÇU')"><i class="fa-solid fa-credit-card"></i> Reçus</button>
+    </div>
+    <input class="fi" id="docs-search" placeholder=" Rechercher un client, numéro..." oninput="renderDocsList()" style="margin-bottom:10px">
+    <div id="docs-list" style="max-height:50vh;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- DOC DETAIL MODAL -->
+<div class="modal-overlay" id="docdetail-overlay" onclick="if(event.target.id==='docdetail-overlay')closeDocDetail()">
+  <div class="modal" id="docdetail-modal" style="max-height:95vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div id="docdetail-content"></div>
   </div>
 </div>
 
 </div><!-- end .app -->
+
+<!-- Zone d'impression : DOIT rester hors de .app -->
 <div id="print-area"></div>
 
 <script>
+// ═══════════════════════════════════════════════════════════════
+// LOGO PAR DÉFAUT — collez ici votre chaîne base64 d'origine :
+// const CJS_LOGO="data:image/jpeg;base64,/9j/4AAQ....";
+// ═══════════════════════════════════════════════════════════════
 const CJS_LOGO="";
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(Math.round(n||0))+' FCFA';
 const fmtN=n=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(Math.round(n||0));
 const today=()=>new Date().toLocaleDateString('fr-FR');
+const addDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toLocaleDateString('fr-FR');};
+const frToIso=s=>{const m=String(s||'').trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);return m?`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`:null;};
 const isoToday=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
-const monthKey=s=>String(s||'').slice(3);
+const monthKey=s=>String(s||'').slice(3); // "mm/aaaa"
 
-const KEY={docs:'cjs_docs_v2',agenda:'cjs_agenda_v1',stock:'cjs_stock_v1',settings:'cjs_settings_v1',counters:'cjs_counters_v1',lastExport:'cjs_last_export_v1'};
+const KEY={docs:'cjs_docs_v2',agenda:'cjs_agenda_v1',stock:'cjs_stock_v1',settings:'cjs_settings_v1',counters:'cjs_counters_v1'};
 const LS={
   get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},
-  set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){alert('⚠ Stockage plein.');return false;}}
+  set(k,v){
+    try{localStorage.setItem(k,JSON.stringify(v));return true;}
+    catch(e){alert('⚠ Stockage plein ou indisponible. Exportez vos données (Paramètres → Sauvegarde) puis supprimez d\'anciens documents.');return false;}
+  }
 };
 
-let agencyState={name:'CJ Studios',invoiceColor:'#0088CC',defaultTaxes:[{id:1,name:'TVA',rate:19.25,enabled:true}]};
+// ═══════════════════════════════════════════════════════════════
+// ÉTAT
+// ═══════════════════════════════════════════════════════════════
+const PRESET_COLORS=['#0088CC','#7F77DD','#D4537E','#1D9E75','#EF9F27','#185FA5','#E24B4A','#8B5CF6','#0891B2','#059669','#DC2626','#1a1a2e'];
+let agencyState={
+  name:'CJ Studios',phone:'',email:'',address:'Yaoundé, Cameroun',niu:'',rc:'',
+  logoDataURL:CJS_LOGO||null,invoiceColor:'#0088CC',policy:'',
+  defaultTaxes:[{id:1,name:'TVA',rate:19.25,enabled:true}]
+};
 Object.assign(agencyState,LS.get(KEY.settings,{}));
-let stockData=[],mouvHistory=[];
-{const s=LS.get(KEY.stock,{stock:[],mouv:[]});stockData=s.stock||[];mouvHistory=s.mouv||[];}
 
-let invDocType='FACTURE',invNum='';
+let stockData=[],mouvHistory=[],mouvType='Entrée';
+{const s=LS.get(KEY.stock,{stock:[],mouv:[]});stockData=s.stock||[];mouvHistory=s.mouv||[];}
+function persistStock(){LS.set(KEY.stock,{stock:stockData,mouv:mouvHistory});}
+
+let invTaxes=[],livraisonMode='none';
+let invStep=1,invLignes=[],sigInvA=null,sigInvC=null,invDocType='FACTURE',invNum='';
+let sigBCA=null,sigBCC=null,sigBLA=null,sigBLC=null,sigRCA=null,sigRCC=null;
+let bcLignes=[],blArticles=[],bcNum='',blNum='',rcNum='';
+let docFilter='all',stockFilter='Tous';
+
+// ═══════════════════════════════════════════════════════════════
+// NUMÉROTATION SÉQUENTIELLE (par préfixe et par année)
+// ═══════════════════════════════════════════════════════════════
+const PREFIX={FACTURE:'F',DEVIS:'D','REÇU':'R',BC:'BC',BL:'BL'};
+function peekNum(p){
+  const y=new Date().getFullYear(),c=LS.get(KEY.counters,{});
+  return `${p}-${y}-${String((c[p+'-'+y]||0)+1).padStart(4,'0')}`;
+}
+function commitNum(p){
+  const y=new Date().getFullYear(),c=LS.get(KEY.counters,{});
+  c[p+'-'+y]=(c[p+'-'+y]||0)+1;LS.set(KEY.counters,c);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STOCKAGE DES DOCUMENTS
+// ═══════════════════════════════════════════════════════════════
+const loadDocs=()=>LS.get(KEY.docs,[]);
+function saveDocument(doc){
+  const docs=loadDocs();
+  const i=docs.findIndex(d=>d.id===doc.id);
+  if(i>=0)docs[i]=doc;else docs.unshift(doc);
+  if(!LS.set(KEY.docs,docs))return false;
+  updateDashboard();return true;
+}
+function deleteDoc(id){
+  if(!confirm('Supprimer définitivement ce document ?'))return;
+  LS.set(KEY.docs,loadDocs().filter(d=>d.id!==id));
+  renderDocsList();updateDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
 function goScreen(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   $('screen-'+name).classList.add('active');
   const nb=$('nav-'+name);if(nb)nb.classList.add('active');
+  else if(name==='delivery'||name==='receipt'){$('nav-orders').classList.add('active');}
   window.scrollTo(0,0);
+  if(name==='reports')updateReports();
+  if(name==='agenda'){renderCalendar();renderAgenda();}
 }
-function resetScreen(name){location.reload();}
-function openSettings(){$('settings-overlay').classList.add('open');}
-function closeSettings(){$('settings-overlay').classList.remove('open');}
-function openDocs(){$('docs-overlay').classList.add('open');}
-function closeDocs(){$('docs-overlay').classList.remove('open');}
-function showNotifs(){}
-function installApp(){alert('Pour installer l\'application sur mobile, veuillez héberger ce fichier sur un serveur web (ex: GitHub Pages ou Netlify) afin d\'activer le protocole sécurisé requis par le navigateur.');}
+function resetScreen(name){sessionStorage.setItem('cjs_go',name);location.reload();}
 
-// Vérification du rappel de sauvegarde (7 jours)
-function checkBackupReminder(){
-  const lastExp=LS.get(KEY.lastExport,null);
-  if(!lastExp){$('backup-reminder-banner').style.display='flex';return;}
-  const diffDays=(Date.now()-new Date(lastExp).getTime())/(1000*3600*24);
-  if(diffDays>=7){$('backup-reminder-banner').style.display='flex';}
-  else{$('backup-reminder-banner').style.display='none';}
+// ═══════════════════════════════════════════════════════════════
+// PARAMÈTRES
+// ═══════════════════════════════════════════════════════════════
+let saveTimer=null;
+function saveSettings(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>LS.set(KEY.settings,agencyState),300);}
+function fillSettingsFields(){
+  $('set-agency-name').value=agencyState.name||'';
+  $('set-phone').value=agencyState.phone||'';
+  $('set-email').value=agencyState.email||'';
+  $('set-address').value=agencyState.address||'';
+  $('set-niu').value=agencyState.niu||'';
+  $('set-rc').value=agencyState.rc||'';
+  $('set-policy').value=agencyState.policy||'';
 }
-
-// EXPORT EXCEL (SheetJS avec une feuille par type)
-function exportExcel(){
-  const wb=XLSX.utils.book_new();
-  const docs=LS.get(KEY.docs,[]);
-
-  // 1. Factures
-  const factures=docs.filter(d=>d.type==='FACTURE').map(d=>({ID:d.id,Numéro:d.num,Client:d.client,Date:d.date,TotalHT:d.ht,TotalTTC:d.ttc,Statut:d.statut}));
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(factures.length?factures:[{Info:'Aucune facture'}]),'Factures');
-
-  // 2. Devis
-  const devis=docs.filter(d=>d.type==='DEVIS').map(d=>({ID:d.id,Numéro:d.num,Client:d.client,Date:d.date,TotalTTC:d.ttc}));
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(devis.length?devis:[{Info:'Aucun devis'}]),'Devis');
-
-  // 3. Reçus
-  const recus=docs.filter(d=>d.type==='REÇU').map(d=>({ID:d.id,Numéro:d.num,Client:d.client,Date:d.date,Montant:d.ttc}));
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(recus.length?recus:[{Info:'Aucun reçu'}]),'Reçus');
-
-  // 4. Bons (BC & BL)
-  const bons=docs.filter(d=>d.type==='BC'||d.type==='BL').map(d=>({ID:d.id,Type:d.type,Numéro:d.num,Client:d.client,Date:d.date}));
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(bons.length?bons:[{Info:'Aucun bon'}]),'Bons');
-
-  // 5. Stock
-  const stock=stockData.map(a=>({Nom:a.nom,Catégorie:a.cat,Quantité:a.qte,StockMin:a.min,PrixUnitaire:a.pu}));
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(stock.length?stock:[{Info:'Aucun article'}]),'Stock');
-
-  // 6. Mouvements
-  const mouv=mouvHistory.map(m=>({Article:m.article,Type:m.type,Quantité:m.qte,Date:m.date,Note:m.note}));
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(mouv.length?mouv:[{Info:'Aucun mouvement'}]),'Mouvements');
-
-  // 7. Agenda
-  const agenda=LS.get(KEY.agenda,[]).map(e=>({Titre:e.titre,Type:e.type,Date:e.date,Heure:e.heure,Client:e.client,Montant:e.montant}));
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(agenda.length?agenda:[{Info:'Aucun événement'}]),'Agenda');
-
-  XLSX.writeFile(wb,'cj-studios-export-'+isoToday()+'.xlsx');
-  LS.set(KEY.lastExport,new Date().toISOString());
-  checkBackupReminder();
+function openSettings(){
+  $('color-grid').innerHTML=PRESET_COLORS.map(c=>`<div class="color-swatch ${c===agencyState.invoiceColor?'selected':''}" style="background:${c}" onclick="setInvoiceColor('${c}',this)"></div>`).join('');
+  $('custom-color').value=agencyState.invoiceColor;
+  renderDefaultTaxes();
+  $('settings-overlay').classList.add('open');
 }
-
-// IMPORT EXCEL
-function importExcel(input){
+function closeSettings(){applySettings();LS.set(KEY.settings,agencyState);$('settings-overlay').classList.remove('open');}
+function applyColor(hex){
+  document.documentElement.style.setProperty('--invoice-color',hex);
+  document.documentElement.style.setProperty('--accent',hex);
+}
+function setInvoiceColor(hex,el){
+  agencyState.invoiceColor=hex;applyColor(hex);
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
+  if(el)el.classList.add('selected');
+  $('custom-color').value=hex;
+  saveSettings();updateInvPreview();
+}
+function applySettings(){
+  agencyState.name=$('set-agency-name').value||'CJ Studios';
+  agencyState.phone=$('set-phone').value;
+  agencyState.email=$('set-email').value;
+  agencyState.address=$('set-address').value||'Yaoundé, Cameroun';
+  agencyState.niu=$('set-niu').value;
+  agencyState.rc=$('set-rc').value;
+  agencyState.policy=$('set-policy').value;
+  $('header-agency-name').textContent=agencyState.name;
+  $('header-agency-meta').textContent=[agencyState.address,agencyState.phone].filter(Boolean).join(' · ');
+  $('splash-agency-name').textContent=agencyState.name;
+  $('stock-agency-lbl').textContent=agencyState.name;
+  document.title=agencyState.name+' — Facturation';
+  saveSettings();updateInvPreview();
+}
+function uploadLogo(input){
   const f=input.files[0];if(!f)return;
   const r=new FileReader();
-  r.onload=e=>{
-    try{
-      const data=new Uint8Array(e.target.result);
-      const wb=XLSX.read(data,{type:'array'});
-      
-      // Lecture de la feuille Stock si elle existe
-      if(wb.Sheets['Stock']){
-        const jsonStock=XLSX.utils.sheet_to_json(wb.Sheets['Stock']);
-        if(jsonStock.length) {
-          stockData=jsonStock.map(row=>({nom:row.Nom||'',cat:row.Catégorie||'Autre',qte:Number(row.Quantité)||0,min:Number(row.StockMin)||5,pu:Number(row.PrixUnitaire)||0}));
-        }
-      }
-      LS.set(KEY.stock,{stock:stockData,mouv:mouvHistory});
-      alert('✅ Import Excel réussi !');location.reload();
-    }catch(err){alert('Erreur lors de l\'import du fichier Excel.');}
-  };
-  r.readAsArrayBuffer(f);
+  r.onload=e=>{agencyState.logoDataURL=e.target.result;saveSettings();refreshLogos();updateInvPreview();};
+  r.readAsDataURL(f);
+}
+function removeLogo(){agencyState.logoDataURL=null;saveSettings();refreshLogos();updateInvPreview();}
+function logoHTML(size=32){
+  if(agencyState.logoDataURL)return `<img src="${agencyState.logoDataURL}" alt="" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:contain;background:#fff">`;
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,${agencyState.invoiceColor},#005FAA);display:flex;align-items:center;justify-content:center;font-size:${Math.round(size*.3)}px;font-weight:900;color:#fff">CJS</div>`;
+}
+function refreshLogos(){
+  const L=agencyState.logoDataURL;
+  [['header-logo-img','header-logo-txt'],['splash-logo-img','splash-logo-txt'],['logo-preview','logo-preview-txt']].forEach(([i,t])=>{
+    const img=$(i),txt=$(t);
+    if(L){img.src=L;img.style.display='block';txt.style.display='none';}
+    else{img.removeAttribute('src');img.style.display='none';txt.style.display='block';}
+  });
+  ['inv','bc','bl','rc'].forEach(id=>{const el=$(id+'-header-logo');if(el)el.innerHTML=logoHTML(36);});
+  $('apple-icon').href=L||'';
 }
 
-// SAUVEGARDE AUTOMATIQUE SUR FICHIER (Chrome / Edge Bureau)
-async function autoSaveFile(){
-  if(!window.showSaveFilePicker){
-    alert('La sauvegarde automatique par accès fichier direct n\'est pas supportée par ce navigateur (utilisez Chrome ou Edge sur ordinateur). Utilisez l\'export Excel classique.');
-    return;
-  }
-  try{
-    const handle=await window.showSaveFilePicker({
-      suggestedName:'cj-studios-sauvegarde-'+isoToday()+'.json',
-      types:[{description:'Fichiers JSON',accept:{'application/json':['.json']}}]
-    });
-    const writable=await handle.createWritable();
-    const data={version:1,date:new Date().toISOString()};
-    Object.entries(KEY).forEach(([n,k])=>{data[n]=LS.get(k,null);});
-    await writable.write(JSON.stringify(data));
-    await writable.close();
-    LS.set(KEY.lastExport,new Date().toISOString());
-    checkBackupReminder();
-    alert('✅ Fichier de sauvegarde automatique mis à jour avec succès !');
-  }catch(e){console.log('Sauvegarde annulée ou non autorisée');}
+// Taxes par défaut
+function renderDefaultTaxes(){
+  const el=$('default-taxes-list');
+  if(!agencyState.defaultTaxes.length){el.innerHTML='<p style="font-size:11px;color:var(--muted);padding:8px 0">Aucune taxe configurée</p>';return;}
+  el.innerHTML=agencyState.defaultTaxes.map(t=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);margin-bottom:7px">
+      <input type="checkbox" ${t.enabled?'checked':''} onchange="toggleDefaultTax(${t.id},this.checked)" style="accent-color:var(--accent);width:16px;height:16px;flex-shrink:0">
+      <div style="flex:1"><p style="font-size:13px;font-weight:700;color:var(--text);margin:0">${esc(t.name)}</p><p style="font-size:10px;color:var(--muted);margin:0">${t.rate}%</p></div>
+      <button onclick="removeDefaultTax(${t.id})" style="background:none;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:0">×</button>
+    </div>`).join('');
+}
+function toggleDefaultTax(id,v){const t=agencyState.defaultTaxes.find(x=>x.id===id);if(t)t.enabled=v;saveSettings();}
+function removeDefaultTax(id){agencyState.defaultTaxes=agencyState.defaultTaxes.filter(t=>t.id!==id);saveSettings();renderDefaultTaxes();}
+function addDefaultTax(){$('default-tax-form').style.display='block';}
+function saveDefaultTax(){
+  const name=$('dtax-name').value.trim(),rate=parseFloat($('dtax-rate').value)||0;
+  if(!name||rate<=0){alert('Nom et taux requis.');return;}
+  agencyState.defaultTaxes.push({id:Date.now(),name,rate,enabled:true});
+  saveSettings();renderDefaultTaxes();
+  $('default-tax-form').style.display='none';$('dtax-name').value='';$('dtax-rate').value='';
+}
+function insertPolicy(text){
+  const ta=$('set-policy');ta.value=(ta.value?ta.value+'\n':'')+text;applySettings();
 }
 
-// Export / Import JSON d'origine
+// Sauvegarde / restauration
 function exportBackup(){
   const data={version:1,date:new Date().toISOString()};
   Object.entries(KEY).forEach(([n,k])=>{data[n]=LS.get(k,null);});
@@ -815,8 +1175,6 @@ function exportBackup(){
   a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
   a.download='cj-studios-sauvegarde-'+isoToday()+'.json';
   document.body.appendChild(a);a.click();a.remove();
-  LS.set(KEY.lastExport,new Date().toISOString());
-  checkBackupReminder();
 }
 function importBackup(input){
   const f=input.files[0];if(!f)return;
@@ -826,17 +1184,865 @@ function importBackup(input){
     try{
       const d=JSON.parse(e.target.result);
       Object.entries(KEY).forEach(([n,k])=>{if(d[n]!==null&&d[n]!==undefined)localStorage.setItem(k,JSON.stringify(d[n]));});
-      alert('✅ Sauvegarde JSON importée.');location.reload();
+      alert('✅ Sauvegarde importée.');location.reload();
     }catch(err){alert('Fichier invalide.');}
   };
   r.readAsText(f);
 }
 
-// Initialisation au chargement
-window.addEventListener('DOMContentLoaded',()=>{
-  checkBackupReminder();
-  setTimeout(()=>{$('splash').classList.add('hide');},800);
-});
+// ═══════════════════════════════════════════════════════════════
+// GRAPHIQUES
+// ═══════════════════════════════════════════════════════════════
+function renderMonthly(id){
+  const el=$(id);
+  const fac=loadDocs().filter(d=>d.type==='FACTURE');
+  const m={};fac.forEach(d=>{const k=monthKey(d.date);m[k]=(m[k]||0)+(d.ttc||0);});
+  const keys=Object.keys(m).sort((a,b)=>a.slice(3)+a.slice(0,2)<b.slice(3)+b.slice(0,2)?-1:1).slice(-6);
+  if(!keys.length){el.innerHTML='<div class="chart-empty">Aucune donnée — commencez à saisir des factures</div>';return;}
+  const max=Math.max(...keys.map(k=>m[k]))||1;
+  el.innerHTML=keys.map(k=>`<div class="bar-col"><div class="bar-val">${Math.round(m[k]/1000)}K</div><div class="bar" style="height:${Math.max(3,Math.round(m[k]/max*80))}px;background:var(--invoice-color)"></div><div class="bar-lbl">${esc(k.slice(0,2)+'/'+k.slice(5))}</div></div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TABLEAU DE BORD & RAPPORTS
+// ═══════════════════════════════════════════════════════════════
+const DOC_ICONS={FACTURE:'🧾',DEVIS:'📋',BC:'📦',BL:'🚚','REÇU':'💰'};
+const DOC_COLORS={FACTURE:'var(--accent-light)',DEVIS:'var(--green-light)',BC:'var(--green-light)',BL:'var(--pink-light)','REÇU':'var(--amber-light)'};
+const EV_TYPES={
+  echeance:{label:'Échéance',icon:'💰',color:'#E24B4A',bg:'#FCEBEB'},
+  livraison:{label:'Livraison',icon:'🚚',color:'#D4537E',bg:'#FBEAF0'},
+  paiement:{label:'Paiement',icon:'💳',color:'#1D9E75',bg:'#E1F5EE'},
+  rdv:{label:'RDV',icon:'📌',color:'#0088CC',bg:'#E0F3FF'},
+  autre:{label:'Événement',icon:'📅',color:'#EF9F27',bg:'#FAEEDA'}
+};
+function updateDashboard(){
+  const docs=loadDocs(),mk=monthKey(today());
+  const facM=docs.filter(d=>d.type==='FACTURE'&&monthKey(d.date)===mk);
+  const ventes=facM.reduce((s,d)=>s+(d.ttc||0),0);
+  $('dash-ventes').textContent=fmtN(ventes);
+  $('dash-ventes-sub').textContent='FCFA · '+(facM.length?facM.length+' facture(s)':'aucune facture');
+  $('dash-factures').textContent=facM.length;
+  $('dash-factures-sub').textContent=facM.length?facM.length+' facture(s) ce mois':'Aucune facture ce mois';
+  $('dash-bons').textContent=docs.filter(d=>d.type==='BL'&&monthKey(d.date)===mk).length;
+  const crit=stockData.filter(a=>['Critique','Épuisé'].includes(getStatut(a.qte,a.min).label)).length;
+  $('dash-stock').textContent=crit;
+  $('dash-stock').style.color=crit>0?'var(--red)':'var(--green)';
+  $('dash-stock-sub').textContent=crit===0?'Tous les stocks sont OK':crit+' article(s) à réapprovisionner';
+
+  const feed=$('activity-feed');
+  feed.innerHTML=docs.length===0?'<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">Aucune activité — créez votre premier document</div>'
+    :docs.slice(0,5).map(d=>`<div class="list-row">
+      <div class="row-icon" style="background:${DOC_COLORS[d.type]||'var(--bg)'}">${DOC_ICONS[d.type]||'📄'}</div>
+      <div class="row-info"><h4>${esc(d.type)} ${esc(d.num)}</h4><p>${esc(d.client)} · ${esc(d.date)}</p></div>
+      <div class="row-right"><div class="row-amount">${d.ttc>0?fmtN(d.ttc)+' F':'—'}</div><span class="badge b-green">${esc(d.statut||'Émis')}</span></div>
+    </div>`).join('');
+
+  renderMonthly('dash-chart');
+
+  const up=loadEvents().filter(e=>!e.done&&e.date>=isoToday()).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,3);
+  $('dash-agenda-list').innerHTML=up.length===0?'<div style="padding:10px;text-align:center;color:var(--muted);font-size:11px">Aucun événement à venir</div>'
+    :up.map(e=>{const t=EV_TYPES[e.type]||EV_TYPES.autre;return `<div class="list-row" onclick="goScreen('agenda')" style="cursor:pointer"><div class="row-icon" style="background:${t.bg}">${t.icon}</div><div class="row-info"><h4>${esc(e.titre)}</h4><p>${esc(formatEvDate(e.date))}${e.heure?' à '+esc(e.heure):''}</p></div>${e.montant>0?`<div class="row-right"><div class="row-amount">${fmtN(e.montant)} F</div></div>`:''}</div>`;}).join('');
+  updateNotifDot();
+}
+function updateReports(){
+  const docs=loadDocs(),fac=docs.filter(d=>d.type==='FACTURE');
+  $('rep-ht').textContent=fmtN(fac.reduce((s,d)=>s+(d.ht||0),0));
+  $('rep-ttc').textContent=fmtN(fac.reduce((s,d)=>s+(d.ttc||0),0));
+  $('rep-tva').textContent=fmtN(fac.reduce((s,d)=>s+(d.totalTax||0),0));
+  $('rep-nb').textContent=fac.length;
+  $('rep-docs-list').innerHTML=docs.length===0?'<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">Aucun document enregistré</div>'
+    :docs.slice(0,50).map(d=>`<div class="list-row"><div class="row-info"><h4>${esc(d.type)} ${esc(d.num)} · ${esc(d.client)}</h4><p>${esc(d.date)}</p></div><div class="row-right"><div class="row-amount">${d.ttc>0?fmtN(d.ttc)+' F':'—'}</div></div></div>`).join('');
+  const sv=stockData.reduce((s,a)=>s+a.qte*a.pu,0);
+  const al=stockData.filter(a=>getStatut(a.qte,a.min).label!=='OK').length;
+  $('rep-stock-count').textContent=stockData.length;
+  $('rep-stock-val').textContent=fmt(sv);
+  $('rep-stock-alerte').textContent=al;
+  $('rep-stock-alerte').style.color=al>0?'var(--red)':'var(--green)';
+  renderMonthly('report-chart');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIGNATURES
+// ═══════════════════════════════════════════════════════════════
+function initSig(id,onDone){
+  const c=$(id);if(!c)return;
+  const ctx=c.getContext('2d');let drawing=false;
+  const pos=e=>{const r=c.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return{x:(s.clientX-r.left)*c.width/r.width,y:(s.clientY-r.top)*c.height/r.height};};
+  const start=e=>{e.preventDefault();drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);};
+  const move=e=>{if(!drawing)return;e.preventDefault();ctx.strokeStyle='#1a1a2e';ctx.lineWidth=2;ctx.lineCap='round';const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();};
+  const end=()=>{if(drawing){drawing=false;c.classList.add('signed');onDone&&onDone(c.toDataURL('image/png'));}};
+  c.addEventListener('mousedown',start);c.addEventListener('mousemove',move);c.addEventListener('mouseup',end);c.addEventListener('mouseleave',()=>{if(drawing)end();});
+  c.addEventListener('touchstart',start,{passive:false});c.addEventListener('touchmove',move,{passive:false});c.addEventListener('touchend',end);
+}
+function clearSig(id,hintId,cb){
+  const c=$(id);c.getContext('2d').clearRect(0,0,c.width,c.height);c.classList.remove('signed');
+  const h=hintId&&$(hintId);if(h)h.textContent='✏️ Signez ici';
+  cb&&cb();
+}
+function checkInvSigs(){$('sig-inv-ok').style.display=(sigInvA&&sigInvC)?'block':'none';}
+function initAllSigs(){
+  initSig('sig-inv-agence',d=>{sigInvA=d;checkInvSigs();updateInvPreview();});
+  initSig('sig-inv-client',d=>{sigInvC=d;$('sih-ic').textContent='✓ Signé';checkInvSigs();updateInvPreview();});
+  initSig('sig-bc-a',d=>{sigBCA=d;});
+  initSig('sig-bc-c',d=>{sigBCC=d;$('sih-bc').textContent='✓ Signé';});
+  initSig('sig-bl-a',d=>{sigBLA=d;});
+  initSig('sig-bl-c',d=>{sigBLC=d;$('sih-bl').textContent='✓ Signé';});
+  initSig('sig-rc-a',d=>{sigRCA=d;});
+  initSig('sig-rc-c',d=>{sigRCC=d;$('sih-rc').textContent='✓ Signé';});
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FACTURE / DEVIS / REÇU (écran Factures)
+// ═══════════════════════════════════════════════════════════════
+function refreshInvNum(){invNum=peekNum(PREFIX[invDocType]);$('inv-num').textContent=invNum;}
+function renderInvStepBar(){
+  $('inv-step-bar').innerHTML=['Client','Articles','Aperçu'].map((s,i)=>{
+    const n=i+1,st=n<invStep?'done':n===invStep?'active':'idle';
+    return `<div class="step-item"><div class="step-dot ${st}">${st==='done'?'✓':n}</div><span class="step-lbl ${st}">${s}</span></div>${i<2?'<div class="step-line"></div>':''}`;
+  }).join('');
+}
+function showInvStep(n){
+  [1,2,3].forEach(i=>{$('inv-s'+i).style.display=i===n?'block':'none';});
+  $('inv-success').style.display='none';invStep=n;renderInvStepBar();
+  if(n===3){checkInvSigs();updateInvPreview();}
+  window.scrollTo(0,0);
+}
+function invNext(s){
+  if(s===1&&!$('iv-nom').value.trim()){alert('Saisir le nom du client.');return;}
+  if(s===2&&invLignes.every(l=>!l.desc&&!l.pu)){alert('Ajouter au moins un article.');return;}
+  showInvStep(s+1);
+}
+function invBack(s){showInvStep(s-1);}
+function setDtype(btn,type){
+  document.querySelectorAll('#screen-invoices .dtype-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');invDocType=type;
+  $('inv-type-lbl').textContent=type;refreshInvNum();updateInvPreview();
+}
+
+const UNITES=['Unité','Forfait','Heure','Jour','m²','Page','Ex.','Lot'];
+function addInvLigne(){invLignes.push({id:Date.now()+Math.random(),desc:'',qte:1,pu:0,unite:'Unité'});renderInvLignes();}
+function removeInvLigne(id){invLignes=invLignes.filter(l=>l.id!==id);renderInvLignes();}
+function updateInvLigne(id,k,v){
+  const l=invLignes.find(x=>x.id===id);if(!l)return;
+  l[k]=(k==='qte'||k==='pu')?(Number(v)||0):v;
+  const lt=$('lt-'+String(id).replace('.','_'));if(lt)lt.textContent='Sous-total : '+fmt(l.qte*l.pu);
+  calcInvTotaux();
+}
+const lid=id=>String(id).replace('.','_');
+function renderInvLignes(){
+  $('inv-lignes').innerHTML=invLignes.map((l,i)=>`
+    <div class="ligne-box">
+      ${invLignes.length>1?`<button class="btn-rm" onclick="removeInvLigne(${l.id})">×</button>`:''}
+      <p style="font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Ligne ${i+1}</p>
+      <div class="form-row">
+        <div class="fg"><label class="lbl">Désignation</label><input class="fi" value="${esc(l.desc)}" oninput="updateInvLigne(${l.id},'desc',this.value)" placeholder="Description du service ou produit"></div>
+        <div class="fg third"><label class="lbl">Qté</label><input class="fi" type="number" min="0" step="any" value="${l.qte}" oninput="updateInvLigne(${l.id},'qte',this.value)"></div>
+        <div class="fg third"><label class="lbl">Unité</label><select class="fi" onchange="updateInvLigne(${l.id},'unite',this.value)">${UNITES.map(u=>`<option${u===l.unite?' selected':''}>${u}</option>`).join('')}</select></div>
+        <div class="fg third"><label class="lbl">P.U. HT</label><input class="fi" type="number" min="0" step="any" value="${l.pu}" oninput="updateInvLigne(${l.id},'pu',this.value)"></div>
+      </div>
+      <p class="ligne-total" id="lt-${lid(l.id)}">Sous-total : ${fmt(l.qte*l.pu)}</p>
+    </div>`).join('');
+  calcInvTotaux();
+}
+function calcInvTotaux(){
+  const ht=invLignes.reduce((s,l)=>s+l.qte*l.pu,0);
+  const pct=Math.min(100,Math.max(0,parseFloat($('inv-remise-pct')?.value)||0));
+  const remise=ht*pct/100,base=ht-remise;
+  const taxBreakdown=invTaxes.filter(t=>t.enabled).map(t=>({name:t.name,rate:t.rate,amount:base*t.rate/100}));
+  const totalTax=taxBreakdown.reduce((s,t)=>s+t.amount,0);
+  const livMode=livraisonMode;
+  const livMontant=livMode==='paid'?(parseFloat($('liv-montant')?.value)||0):0;
+  const livLabel=livMode==='free'?'Livraison offerte':livMode==='paid'?'Frais de livraison':null;
+  const ttc=base+totalTax+livMontant;
+  $('inv-ht').textContent=fmt(ht);$('inv-base').textContent=fmt(base);
+  $('inv-tva').textContent=fmt(totalTax);$('inv-ttc').textContent=fmt(ttc);
+  const rr=$('inv-remise-row');
+  if(pct>0){rr.style.display='flex';$('inv-remise-val').textContent='- '+fmt(remise);$('inv-remise-mt').value=fmt(remise);}
+  else{rr.style.display='none';$('inv-remise-mt').value='';}
+  renderInvTaxes();
+  return{ht,remise,base,totalTax,taxBreakdown,livMontant,livLabel,livMode,ttc};
+}
+function updateInvPreview(){
+  const prev=$('inv-preview');if(!prev)return;
+  const v=id=>$(id)?.value||'';
+  const nom=v('iv-nom')||'—',niu=v('iv-niu'),adr=v('iv-adresse'),tel=v('iv-tel'),objet=v('iv-objet');
+  const date=v('iv-date')||today(),ech=v('iv-ech'),mode=v('iv-mode'),note=v('iv-note');
+  const{ht,remise,base,taxBreakdown,livMontant,livLabel,ttc}=calcInvTotaux();
+  const rows=invLignes.filter(l=>l.desc||l.pu>0).map(l=>`<tr><td>${esc(l.desc)||'—'}</td><td style="text-align:center">${l.qte} ${esc(l.unite)}</td><td style="text-align:right">${fmt(l.pu)}</td><td style="text-align:right;font-weight:700">${fmt(l.qte*l.pu)}</td></tr>`).join('');
+  const nosig='<div style="height:45px;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:9px">Non signée</div>';
+  const sigA=sigInvA?`<img src="${sigInvA}" alt="" style="width:100%;height:45px;object-fit:contain">`:nosig;
+  const sigC=sigInvC?`<img src="${sigInvC}" alt="" style="width:100%;height:45px;object-fit:contain">`:nosig;
+  const color=agencyState.invoiceColor;
+  const niuAg=agencyState.niu?`<p style="font-size:8px;color:#888;margin:0">NIU: ${esc(agencyState.niu)}</p>`:'';
+  prev.innerHTML=`
+    <div class="inv-ph">
+      <div style="display:flex;align-items:center;gap:7px">${logoHTML(34)}
+        <div><p style="font-weight:800;font-size:11px;color:#1a1a2e;margin:0">${esc(agencyState.name)}</p>
+        <p style="font-size:8px;color:#888;margin:0">${esc([agencyState.address,agencyState.phone,agencyState.email].filter(Boolean).join(' · '))}</p>${niuAg}</div>
+      </div>
+      <div style="text-align:right">
+        <p style="font-weight:800;font-size:14px;color:${color};margin:0">${esc(invDocType)}</p>
+        <p style="font-size:8px;color:#888;margin:0">N° ${esc(invNum)} · ${esc(date)}</p>
+        ${ech?`<p style="font-size:8px;color:#888;margin:0">Échéance : ${esc(ech)}</p>`:''}
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px">
+      <div style="background:#f8f8f8;padding:7px;border-radius:5px;font-size:9px"><p style="font-weight:700;margin:0 0 2px">Émetteur</p><p style="font-weight:600;margin:0">${esc(agencyState.name)}</p><p style="color:#888;margin:0">${esc(agencyState.address)}</p>${niuAg}</div>
+      <div style="background:#f0f6ff;padding:7px;border-radius:5px;font-size:9px"><p style="font-weight:700;margin:0 0 2px">Facturé à</p><p style="font-weight:700;margin:0">${esc(nom)}</p>
+        ${niu?`<p style="color:#888;margin:0">NIU: ${esc(niu)}</p>`:''}${adr?`<p style="color:#888;margin:0">${esc(adr)}</p>`:''}${tel?`<p style="color:#888;margin:0">${esc(tel)}</p>`:''}</div>
+    </div>
+    ${objet?`<div style="background:#fff3e0;border-left:3px solid #EF9F27;padding:4px 7px;margin-bottom:6px;font-size:8px;color:#854F0B">Objet : <b>${esc(objet)}</b></div>`:''}
+    <table class="inv-table"><thead><tr><th>Désignation</th><th>Qté</th><th>P.U.HT</th><th>Montant HT</th></tr></thead><tbody>${rows||'<tr><td colspan="4" style="color:#ccc;text-align:center">—</td></tr>'}</tbody></table>
+    <div class="inv-totals">
+      <div class="inv-trow"><span>Sous-total HT</span><span>${fmt(ht)}</span></div>
+      ${remise>0?`<div class="inv-trow"><span>Remise</span><span style="color:#E24B4A">- ${fmt(remise)}</span></div><div class="inv-trow"><span>Base imposable</span><span>${fmt(base)}</span></div>`:''}
+      ${taxBreakdown.map(t=>`<div class="inv-trow"><span>${esc(t.name)} (${t.rate}%)</span><span>${fmt(t.amount)}</span></div>`).join('')}
+      ${livMontant>0?`<div class="inv-trow"><span>Frais de livraison</span><span>${fmt(livMontant)}</span></div>`:''}
+      ${livLabel==='Livraison offerte'?`<div class="inv-trow"><span style="color:#1D9E75">🎁 Livraison offerte</span><span style="color:#1D9E75">OFFERT</span></div>`:''}
+      <div class="inv-ttc"><span>TOTAL TTC</span><span style="color:${color}">${fmt(ttc)}</span></div>
+    </div>
+    ${mode?`<p style="font-size:8px;color:#888;margin-top:5px">💳 ${esc(mode)}</p>`:''}
+    ${note?`<p style="font-size:8px;color:#aaa;font-style:italic;margin-top:3px">${esc(note)}</p>`:''}
+    ${agencyState.policy?`<div style="background:#f8f8f8;border-left:3px solid ${color};padding:6px 8px;margin-top:8px;border-radius:0 6px 6px 0"><p style="font-size:8px;font-weight:700;color:#555;margin:0 0 2px">POLITIQUE COMMERCIALE</p><p style="font-size:7.5px;color:#777;margin:0;white-space:pre-line">${esc(agencyState.policy)}</p></div>`:''}
+    <div class="inv-sigs">
+      <div class="inv-sig">${sigA}<p style="font-size:8px;color:#999;margin-top:3px">${esc(agencyState.name)}</p></div>
+      <div class="inv-sig">${sigC}<p style="font-size:8px;color:#999;margin-top:3px">Signature client</p></div>
+    </div>
+    <p style="font-size:7px;color:#bbb;text-align:center;margin-top:8px">${esc(agencyState.name)} · Conformément à la législation fiscale camerounaise</p>`;
+}
+
+// Taxes & livraison
+function initInvTaxes(){invTaxes=agencyState.defaultTaxes.map(t=>({...t,id:Date.now()+Math.random()}));renderInvTaxes();}
+function renderInvTaxes(){
+  const el=$('tax-list');if(!el)return;
+  if(!invTaxes.length){el.innerHTML='<p style="font-size:11px;color:var(--muted);text-align:center;padding:8px 0">Aucune taxe — ajoutez-en une ou configurez les taxes par défaut</p>';return;}
+  const pct=Math.min(100,Math.max(0,parseFloat($('inv-remise-pct')?.value)||0));
+  const base=invLignes.reduce((s,l)=>s+l.qte*l.pu,0)*(1-pct/100);
+  el.innerHTML=invTaxes.map(t=>`
+    <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:1.5px solid ${t.enabled?'var(--accent)':'var(--border)'};cursor:pointer;background:${t.enabled?'var(--accent-light)':'var(--bg)'};margin-bottom:7px">
+      <input type="checkbox" ${t.enabled?'checked':''} onchange="toggleTax(${t.id},this.checked)" style="accent-color:var(--accent);width:16px;height:16px;flex-shrink:0">
+      <div style="flex:1"><p style="font-size:13px;font-weight:700;color:var(--text);margin:0">${esc(t.name)}</p><p style="font-size:10px;color:var(--muted);margin:0">Taux : ${t.rate}%</p></div>
+      <span style="font-size:12px;font-weight:700;color:${t.enabled?'var(--accent)':'var(--muted)'}">${t.enabled?fmt(base*t.rate/100):'—'}</span>
+      <button type="button" onclick="event.preventDefault();removeTax(${t.id})" style="background:none;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:0;line-height:1">×</button>
+    </label>`).join('');
+}
+function toggleTax(id,v){const t=invTaxes.find(x=>x.id===id);if(t){t.enabled=v;calcInvTotaux();}}
+function removeTax(id){invTaxes=invTaxes.filter(t=>t.id!==id);calcInvTotaux();}
+function addCustomTax(){$('custom-tax-form').style.display='block';}
+function saveCustomTax(){
+  const name=$('ctax-name').value.trim(),rate=parseFloat($('ctax-rate').value)||0;
+  if(!name||rate<=0){alert('Nom et taux requis.');return;}
+  invTaxes.push({id:Date.now(),name,rate,enabled:true});calcInvTotaux();
+  $('custom-tax-form').style.display='none';$('ctax-name').value='';$('ctax-rate').value='';
+}
+function updateLivraison(){
+  const val=document.querySelector('input[name="livraison"]:checked')?.value||'none';
+  livraisonMode=val;$('liv-montant-wrap').style.display=val==='paid'?'block':'none';
+  ['none','free','paid'].forEach(k=>{const el=$('liv-opt-'+k);el.style.borderColor=k===val?'var(--accent)':'var(--border)';el.style.background=k===val?'var(--accent-light)':'var(--bg)';});
+  calcInvTotaux();
+}
+
+function agencyInfo(){return{agency:agencyState.name,agencyAddress:agencyState.address,agencyPhone:agencyState.phone,agencyEmail:agencyState.email,agencyNiu:agencyState.niu,agencyRc:agencyState.rc,color:agencyState.invoiceColor,policy:agencyState.policy};}
+function addPdfButton(container,docId){
+  if(container.querySelector('.pdf-quick-btn'))return;
+  const b=document.createElement('button');b.className='btn btn-outline pdf-quick-btn';b.style.marginTop='8px';
+  b.textContent='📥 Télécharger le PDF';b.onclick=()=>exportDocPDF(docId);container.appendChild(b);
+}
+function submitInvoice(){
+  if(!$('iv-nom').value.trim()){alert('Saisir le nom du client.');showInvStep(1);return;}
+  if(!sigInvC){alert('La signature du client est requise.');return;}
+  const t=calcInvTotaux();
+  const doc={
+    id:'inv-'+Date.now(),type:invDocType,num:invNum,
+    client:$('iv-nom').value.trim(),clientNiu:$('iv-niu').value,clientTel:$('iv-tel').value,
+    clientEmail:$('iv-email').value,clientAddr:$('iv-adresse').value,
+    date:today(),echeance:$('iv-ech').value,objet:$('iv-objet').value,mode:$('iv-mode').value,note:$('iv-note').value,
+    ht:t.ht,remise:t.remise,base:t.base,totalTax:t.totalTax,taxBreakdown:t.taxBreakdown,
+    livMontant:t.livMontant,livLabel:t.livLabel,livMode:t.livMode,ttc:t.ttc,tva:t.totalTax,
+    lignes:invLignes.map(l=>({desc:l.desc,qte:l.qte,pu:l.pu,unite:l.unite})),
+    sigAgence:sigInvA,sigClient:sigInvC,statut:'Émis',...agencyInfo()
+  };
+  if(!saveDocument(doc))return;
+  commitNum(PREFIX[invDocType]);
+  // Échéance → agenda
+  const iso=frToIso(doc.echeance);
+  if(doc.type==='FACTURE'&&iso){
+    const ev=loadEvents();
+    ev.unshift({id:'ev-'+Date.now(),titre:'Échéance paiement — '+doc.client,date:iso,type:'echeance',heure:'',priorite:'haute',client:doc.client,montant:doc.ttc,note:doc.num,done:false,created:new Date().toISOString()});
+    saveEvents(ev);
+  }
+  $('inv-s3').style.display='none';$('inv-success').style.display='block';
+  $('inv-succ-sub').textContent=doc.num+' · '+doc.date;
+  $('inv-succ-cl').textContent=doc.client;
+  $('inv-succ-tva').textContent=fmt(doc.totalTax);
+  $('inv-succ-ttc').textContent=fmt(doc.ttc);
+  addPdfButton($('inv-success'),doc.id);
+  updateDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BON DE COMMANDE
+// ═══════════════════════════════════════════════════════════════
+function addBCLigne(){bcLignes.push({id:Date.now()+Math.random(),desc:'',qte:1,pu:0});renderBCLignes();}
+function removeBCLigne(id){bcLignes=bcLignes.filter(l=>l.id!==id);renderBCLignes();}
+function updateBCLigne(id,k,v){
+  const l=bcLignes.find(x=>x.id===id);if(!l)return;
+  l[k]=(k==='qte'||k==='pu')?(Number(v)||0):v;
+  const lt=$('bct-'+lid(id));if(lt)lt.textContent='Sous-total : '+fmt(l.qte*l.pu);
+  calcBCTotaux();
+}
+function renderBCLignes(){
+  $('bc-lignes').innerHTML=bcLignes.map((l,i)=>`
+    <div class="ligne-box">
+      ${bcLignes.length>1?`<button class="btn-rm" onclick="removeBCLigne(${l.id})">×</button>`:''}
+      <p style="font-size:9px;font-weight:800;color:var(--muted);margin-bottom:6px">Ligne ${i+1}</p>
+      <div class="form-row">
+        <div class="fg"><label class="lbl">Désignation</label><input class="fi" value="${esc(l.desc)}" oninput="updateBCLigne(${l.id},'desc',this.value)" placeholder="Description de l'article"></div>
+        <div class="fg half"><label class="lbl">Quantité</label><input class="fi" type="number" min="0" step="any" value="${l.qte}" oninput="updateBCLigne(${l.id},'qte',this.value)"></div>
+        <div class="fg half"><label class="lbl">P.U. HT (FCFA)</label><input class="fi" type="number" min="0" step="any" value="${l.pu}" oninput="updateBCLigne(${l.id},'pu',this.value)"></div>
+      </div>
+      <p class="ligne-total" id="bct-${lid(l.id)}">Sous-total : ${fmt(l.qte*l.pu)}</p>
+    </div>`).join('');
+  calcBCTotaux();
+}
+function calcBCTotaux(){
+  const ht=bcLignes.reduce((s,l)=>s+l.qte*l.pu,0),tva=ht*0.1925,ttc=ht+tva;
+  $('bc-ht').textContent=fmt(ht);$('bc-tva').textContent=fmt(tva);$('bc-ttc').textContent=fmt(ttc);
+  return{ht,tva,ttc};
+}
+function submitBC(){
+  if(!$('bc-nom').value.trim()){alert('Nom du client requis.');return;}
+  if(!sigBCC){alert('Signature client requise.');return;}
+  const{ttc,ht,tva}=calcBCTotaux();
+  const doc={
+    id:'bc-'+Date.now(),type:'BC',num:bcNum,client:$('bc-nom').value.trim(),
+    clientTel:$('bc-tel').value,clientAddr:$('bc-adr').value,
+    fournisseur:$('bc-fourn').value,fournisseurTel:$('bc-fourn-tel').value,
+    date:today(),ht,tva,ttc,totalTax:tva,taxBreakdown:[{name:'TVA',rate:19.25,amount:tva}],
+    lignes:bcLignes.map(l=>({desc:l.desc,qte:l.qte,pu:l.pu,unite:''})),
+    sigAgence:sigBCA,sigClient:sigBCC,statut:'Émis',...agencyInfo(),color:'#1D9E75'
+  };
+  if(!saveDocument(doc))return;
+  commitNum('BC');
+  $('bc-form').style.display='none';
+  const s=$('bc-success');s.style.display='block';
+  $('bc-succ-sub').textContent=doc.num+' · '+doc.date+' · '+doc.client;
+  addPdfButton(s,doc.id);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BON DE LIVRAISON
+// ═══════════════════════════════════════════════════════════════
+function addBLArticle(){blArticles.push({id:Date.now()+Math.random(),desc:'',qteCmd:1,qteLiv:1,etat:'Bon état'});renderBLArticles();}
+function removeBLArticle(id){blArticles=blArticles.filter(a=>a.id!==id);renderBLArticles();}
+function blWarn(a){return a.qteLiv<a.qteCmd?`⚠ Partiel : ${a.qteCmd-a.qteLiv} manquant(s)`:'';}
+function updateBLArticle(id,k,v){
+  const a=blArticles.find(x=>x.id===id);if(!a)return;
+  a[k]=(k==='qteCmd'||k==='qteLiv')?(Number(v)||0):v;
+  // Pas de re-rendu complet : on garde le focus et la valeur des champs
+  const w=$('blw-'+lid(id));
+  if(w){const t=blWarn(a);w.textContent=t;w.style.display=t?'block':'none';}
+}
+function renderBLArticles(){
+  $('bl-articles').innerHTML=blArticles.map((a,i)=>`
+    <div class="ligne-box">
+      ${blArticles.length>1?`<button class="btn-rm" onclick="removeBLArticle(${a.id})">×</button>`:''}
+      <p style="font-size:9px;font-weight:800;color:var(--muted);margin-bottom:6px">Article ${i+1}</p>
+      <div class="form-row">
+        <div class="fg"><label class="lbl">Description</label><input class="fi" value="${esc(a.desc)}" oninput="updateBLArticle(${a.id},'desc',this.value)" placeholder="Description de l'article livré"></div>
+        <div class="fg third"><label class="lbl">Qté cmdée</label><input class="fi" type="number" min="0" value="${a.qteCmd}" oninput="updateBLArticle(${a.id},'qteCmd',this.value)"></div>
+        <div class="fg third"><label class="lbl">Qté livrée</label><input class="fi" type="number" min="0" value="${a.qteLiv}" oninput="updateBLArticle(${a.id},'qteLiv',this.value)"></div>
+        <div class="fg third"><label class="lbl">État</label><select class="fi" onchange="updateBLArticle(${a.id},'etat',this.value)">${['Bon état','Endommagé','Manquant'].map(e=>`<option${e===a.etat?' selected':''}>${e}</option>`).join('')}</select></div>
+        <div class="fg" id="blw-${lid(a.id)}" style="display:${blWarn(a)?'block':'none'};background:var(--amber-light);border-radius:7px;padding:5px 8px;font-size:9px;color:var(--amber)">${blWarn(a)}</div>
+      </div>
+    </div>`).join('');
+}
+function submitBL(){
+  if(!$('bl-nom').value.trim()){alert('Destinataire requis.');return;}
+  if(!sigBLC){alert('Signature réceptionnaire requise.');return;}
+  const doc={
+    id:'bl-'+Date.now(),type:'BL',num:blNum,client:$('bl-nom').value.trim(),
+    clientTel:$('bl-tel').value,clientAddr:$('bl-adr').value,
+    refBC:$('bl-ref').value,livreur:$('bl-livreur').value,livreurTel:$('bl-livreur-tel').value,
+    date:today(),ht:0,tva:0,ttc:0,totalTax:0,taxBreakdown:[],
+    lignes:blArticles.map(a=>({desc:a.desc+(a.etat!=='Bon état'?' ['+a.etat+']':''),qte:a.qteLiv,pu:0,unite:''})),
+    sigAgence:sigBLA,sigClient:sigBLC,statut:'Livré',...agencyInfo(),color:'#00AADD'
+  };
+  if(!saveDocument(doc))return;
+  commitNum('BL');
+  $('bl-form').style.display='none';
+  const s=$('bl-success');s.style.display='block';
+  $('bl-succ-sub').textContent=doc.num+' · '+doc.date+' · '+doc.client;
+  addPdfButton(s,doc.id);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REÇU DE PAIEMENT
+// ═══════════════════════════════════════════════════════════════
+function updateRcStatut(){
+  const total=parseFloat($('rc-total').value)||0,recu=parseFloat($('rc-recu').value)||0;
+  const reste=Math.max(0,total-recu),trop=recu>total?recu-total:0;
+  $('rc-disp-total').textContent=fmt(total);$('rc-disp-recu').textContent=fmt(recu);
+  $('rc-disp-reste').textContent=reste>0?fmt(reste):'Soldé ✓';
+  $('rc-disp-reste').style.color=reste>0?'var(--red)':'var(--green)';
+  const tr=$('rc-trop-row');
+  if(trop>0){tr.style.display='flex';$('rc-disp-trop').textContent=fmt(trop);}else tr.style.display='none';
+  const bar=$('rc-statut-bar'),badge=$('rc-statut-badge');
+  if(recu<=0){bar.style.background='var(--red-light)';badge.className='badge b-red';badge.textContent='Non payé';}
+  else if(recu>=total){bar.style.background='var(--green-light)';badge.className='badge b-green';badge.textContent='Soldé';}
+  else{bar.style.background='var(--amber-light)';badge.className='badge b-amber';badge.textContent='Partiel';}
+}
+function submitRC(){
+  if(!$('rc-nom').value.trim()){alert('Nom du client requis.');return;}
+  const recu=parseFloat($('rc-recu').value)||0;
+  if(recu<=0){alert('Le montant reçu doit être > 0.');return;}
+  if(!sigRCC){alert('Signature client requise.');return;}
+  const total=parseFloat($('rc-total').value)||0,reste=Math.max(0,total-recu);
+  const doc={
+    id:'rc-'+Date.now(),type:'REÇU',num:rcNum,client:$('rc-nom').value.trim(),
+    clientTel:$('rc-tel').value,clientEmail:$('rc-email').value,
+    refFacture:$('rc-ref').value,txn:$('rc-txn').value,totalFacture:total,
+    date:today(),ht:0,tva:0,totalTax:0,taxBreakdown:[],ttc:recu,
+    mode:$('rc-mode').value,note:reste>0?'Reste dû : '+fmt(reste):'Paiement soldé',
+    lignes:[],sigAgence:sigRCA,sigClient:sigRCC,statut:reste>0?'Partiel':'Payé',...agencyInfo(),color:'#EF9F27'
+  };
+  if(!saveDocument(doc))return;
+  commitNum('R');
+  $('rc-form').style.display='none';
+  const s=$('rc-success');s.style.display='block';
+  $('rc-succ-sub').textContent=doc.num+' · '+doc.date;
+  $('rc-succ-cl').textContent=doc.client;$('rc-succ-mode').textContent=doc.mode;
+  $('rc-succ-recu').textContent=fmt(recu);
+  $('rc-succ-reste').textContent=reste>0?fmt(reste):'Soldé ✓';
+  $('rc-succ-reste').style.color=reste>0?'var(--red)':'var(--green)';
+  addPdfButton(s,doc.id);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STOCK
+// ═══════════════════════════════════════════════════════════════
+function getStatut(qte,min){
+  if(qte===0)return{label:'Épuisé',color:'var(--red)',bg:'var(--red-light)',pct:0};
+  if(qte<min)return{label:'Critique',color:'var(--red)',bg:'var(--red-light)',pct:Math.round(qte/min*100)};
+  if(qte<min*1.5)return{label:'Bas',color:'var(--amber)',bg:'var(--amber-light)',pct:Math.round(qte/min*100)};
+  return{label:'OK',color:'var(--green)',bg:'var(--green-light)',pct:100};
+}
+function updateStockMeta(){
+  $('stock-valeur').textContent=fmt(stockData.reduce((s,a)=>s+a.qte*a.pu,0));
+  const crit=stockData.filter(a=>['Critique','Épuisé'].includes(getStatut(a.qte,a.min).label)).length;
+  const bas=stockData.filter(a=>getStatut(a.qte,a.min).label==='Bas').length;
+  $('stock-stats-bar').innerHTML=[{l:'Articles',v:stockData.length,c:'#fff'},{l:'Critiques',v:crit,c:'#ff8a89'},{l:'Bas',v:bas,c:'#ffc46b'},{l:'OK',v:stockData.length-crit-bas,c:'#5fe0b3'}]
+    .map(({l,v,c})=>`<div style="padding:7px 0;text-align:center;border-right:1px solid rgba(255,255,255,.07)"><p style="color:${c};font-weight:800;font-size:14px;margin:0">${v}</p><p style="color:rgba(255,255,255,.35);font-size:9px;margin:0">${l}</p></div>`).join('');
+  updateDashboard();
+}
+function styleFilters(containerId,active){
+  document.querySelectorAll('#'+containerId+' button').forEach(b=>{
+    const on=b.dataset.f===active;
+    b.style.background=on?'var(--accent-light)':'var(--bg)';
+    b.style.color=on?'var(--blue)':'var(--muted)';
+    b.style.border='1.5px solid '+(on?'var(--accent)':'var(--border)');
+  });
+}
+function setStockFilter(f){stockFilter=f;styleFilters('stock-filters',f);renderStock();}
+function renderStock(){
+  const q=($('stock-search')?.value||'').toLowerCase();
+  const list=stockData.filter(a=>{
+    const st=getStatut(a.qte,a.min);
+    return(stockFilter==='Tous'||(stockFilter==='Alerte'&&st.label!=='OK')||(stockFilter==='OK'&&st.label==='OK'))&&(!q||a.nom.toLowerCase().includes(q));
+  });
+  const el=$('stock-list');
+  if(!list.length){el.innerHTML=`<div style="padding:30px;text-align:center;color:var(--muted);font-size:12px">${stockData.length===0?'Aucun article — ajoutez votre premier article de stock':'Aucun article correspondant'}</div>`;return;}
+  el.innerHTML=list.map(a=>{
+    const st=getStatut(a.qte,a.min);
+    return `<div class="stock-item">
+      <div class="stock-icon" style="background:${st.bg}">${a.icon||'📦'}</div>
+      <div style="flex:1;min-width:0">
+        <p style="font-weight:700;font-size:12px;color:var(--text);margin:0">${esc(a.nom)}</p>
+        <p style="font-size:10px;color:var(--muted);margin:1px 0 4px">${esc(a.cat)} · ${esc(a.unite)}</p>
+        <div class="progress"><div class="progress-fill" style="width:${st.pct}%;background:${st.color}"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px">
+          <span style="font-size:12px;font-weight:800;color:var(--text)">${fmtN(a.qte)} ${esc(a.unite)}</span>
+          <span style="font-size:10px;color:var(--muted)">Min: ${fmtN(a.min)} · ${fmt(a.qte*a.pu)}</span>
+        </div>
+      </div>
+      <span class="badge" style="background:${st.bg};color:${st.color};flex-shrink:0;margin-left:8px">${st.label}</span>
+    </div>`;
+  }).join('');
+}
+function switchStockTab(t){
+  ['list','mouv','add'].forEach(k=>{$('st-screen-'+k).style.display=k===t?'block':'none';$('st-tab-'+k).classList.toggle('active',k===t);});
+  if(t==='mouv')populateMouvSelect();
+}
+function populateMouvSelect(){
+  $('mouv-article').innerHTML='<option value="">-- Sélectionner un article --</option>'+stockData.map(a=>`<option value="${a.id}">${esc(a.nom)} (${fmtN(a.qte)} ${esc(a.unite)})</option>`).join('');
+  updateMouvInfo();
+}
+function updateMouvInfo(){
+  const a=stockData.find(x=>x.id===Number($('mouv-article').value));
+  $('mouv-actuel-wrap').style.display=a?'block':'none';
+  if(a)$('mouv-actuel').value=fmtN(a.qte)+' '+a.unite;
+}
+function setMouvType(t){
+  mouvType=t;
+  const ib=$('mouv-in-btn'),ob=$('mouv-out-btn'),sb=$('mouv-submit-btn');
+  if(t==='Entrée'){ib.style.cssText='background:var(--green-light);color:var(--green);border:2px solid var(--green)';ob.style.cssText='background:var(--bg);color:var(--muted);border:2px solid var(--border)';sb.style.background='var(--green)';sb.textContent="📥 Enregistrer l'entrée";}
+  else{ob.style.cssText='background:var(--red-light);color:var(--red);border:2px solid var(--red)';ib.style.cssText='background:var(--bg);color:var(--muted);border:2px solid var(--border)';sb.style.background='var(--red)';sb.textContent='📤 Enregistrer la sortie';}
+}
+function appliquerMouvement(){
+  const id=Number($('mouv-article').value),qte=Number($('mouv-qte').value),note=$('mouv-note').value;
+  if(!id){alert('Sélectionnez un article.');return;}
+  if(!(qte>0)){alert('Quantité invalide.');return;}
+  const art=stockData.find(a=>a.id===id);if(!art)return;
+  if(mouvType==='Sortie'&&qte>art.qte){alert(`Stock insuffisant. Disponible : ${art.qte} ${art.unite}`);return;}
+  art.qte=mouvType==='Entrée'?art.qte+qte:art.qte-qte;
+  mouvHistory.unshift({type:mouvType,article:art.nom,qte,date:today(),note});
+  mouvHistory=mouvHistory.slice(0,200);
+  persistStock();renderMouvHistory();populateMouvSelect();updateStockMeta();renderStock();
+  $('mouv-qte').value=1;$('mouv-note').value='';
+}
+function renderMouvHistory(){
+  $('mouv-count').textContent=mouvHistory.length;
+  const el=$('mouv-history');
+  if(!mouvHistory.length){el.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">Aucun mouvement enregistré</div>';return;}
+  el.innerHTML=mouvHistory.slice(0,15).map(m=>`<div class="list-row">
+    <div class="row-icon" style="background:${m.type==='Entrée'?'var(--green-light)':'var(--red-light)'}">${m.type==='Entrée'?'📥':'📤'}</div>
+    <div class="row-info"><h4>${esc(m.article)}</h4><p>${esc(m.note)||'—'} · ${esc(m.date)}</p></div>
+    <div class="row-right"><span style="font-size:14px;font-weight:800;color:${m.type==='Entrée'?'var(--green)':'var(--red)'}">${m.type==='Entrée'?'+':'-'}${fmtN(m.qte)}</span></div>
+  </div>`).join('');
+}
+const CAT_ICONS={Impression:'📸',Design:'🎨',Signalétique:'📜',Consommables:'📦',Matériel:'🔧',Autre:'🗂️'};
+function ajouterArticle(){
+  const nom=$('na-nom').value.trim();
+  if(!nom){alert("Nom de l'article requis.");return;}
+  const cat=$('na-cat').value;
+  stockData.push({id:Date.now(),nom,cat,unite:$('na-unite').value,qte:Math.max(0,Number($('na-qte').value)||0),min:Math.max(0,Number($('na-min').value)||0),pu:Math.max(0,Number($('na-pu').value)||0),icon:CAT_ICONS[cat]||'📦'});
+  persistStock();updateStockMeta();renderStock();
+  $('na-nom').value='';$('na-qte').value=0;
+  switchStockTab('list');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════════
+function updateNotifDot(){
+  const due=loadEvents().filter(e=>!e.done&&e.date<=isoToday()).length;
+  $('notif-dot').style.display=(due>0)?'block':'none';
+}
+function showNotifs(){
+  const crit=stockData.filter(a=>['Critique','Épuisé'].includes(getStatut(a.qte,a.min).label));
+  const due=loadEvents().filter(e=>!e.done&&e.date<=isoToday());
+  const m=['🔔 Notifications'];
+  crit.forEach(a=>m.push('⚠ Stock critique : '+a.nom));
+  due.forEach(e=>m.push('📅 À traiter : '+e.titre));
+  if(!crit.length&&!due.length)m.push('✅ Rien à signaler');
+  alert(m.join('\n'));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PWA
+// ═══════════════════════════════════════════════════════════════
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('install-banner').style.display='flex';});
+function installApp(){
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;$('install-banner').style.display='none';});}
+  else alert("📱 iOS Safari : Partager → « Sur l'écran d'accueil »\n🤖 Android Chrome : Menu ⋮ → « Installer l'application »");
+}
+if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LISTE DES DOCUMENTS
+// ═══════════════════════════════════════════════════════════════
+function openDocs(){styleFilters('docs-filters',docFilter);renderDocsList();$('docs-overlay').classList.add('open');}
+function closeDocs(){$('docs-overlay').classList.remove('open');}
+function setDocFilter(f){docFilter=f;styleFilters('docs-filters',f);renderDocsList();}
+function renderDocsList(){
+  const q=($('docs-search')?.value||'').toLowerCase();
+  const docs=loadDocs().filter(d=>(docFilter==='all'||d.type===docFilter)&&(!q||(d.client||'').toLowerCase().includes(q)||(d.num||'').toLowerCase().includes(q)));
+  const el=$('docs-list');
+  if(!docs.length){el.innerHTML='<div style="padding:30px;text-align:center;color:var(--muted);font-size:12px">Aucun document enregistré</div>';return;}
+  el.innerHTML=docs.map(d=>`
+    <div style="background:var(--card);border-radius:12px;border:1px solid var(--border);padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px">
+      <div style="width:38px;height:38px;border-radius:10px;background:${DOC_COLORS[d.type]||'var(--bg)'};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${DOC_ICONS[d.type]||'📄'}</div>
+      <div style="flex:1;min-width:0;cursor:pointer" onclick="openDocDetail('${d.id}')">
+        <p style="font-size:12px;font-weight:700;color:var(--text);margin:0">${esc(d.type)} · ${esc(d.num)}</p>
+        <p style="font-size:10px;color:var(--muted);margin:1px 0">${esc(d.client)} · ${esc(d.date)}</p>
+        ${d.ttc>0?`<p style="font-size:11px;font-weight:700;color:var(--text);margin:0">${fmt(d.ttc)} TTC</p>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
+        <button onclick="exportDocPDF('${d.id}')" style="padding:5px 9px;border-radius:7px;background:var(--green-light);color:var(--green);border:1px solid var(--green);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">📥 PDF</button>
+        <button onclick="openDocDetail('${d.id}')" style="padding:5px 9px;border-radius:7px;background:var(--accent-light);color:#3C3489;border:1px solid #AFA9EC;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">✏️ Voir</button>
+        <button onclick="deleteDoc('${d.id}')" style="padding:5px 9px;border-radius:7px;background:var(--red-light);color:var(--red);border:1px solid var(--red);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+// Détail
+function sigBox(src,h){return src?`<img class="pa-sig-img" alt="" src="${src}" style="height:${h}px">`:`<div style="height:${h}px;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:10px">Non signée</div>`;}
+function openDocDetail(id){
+  const doc=loadDocs().find(d=>d.id===id);if(!doc)return;
+  const color=doc.color||agencyState.invoiceColor;
+  const taxRows=(doc.taxBreakdown||[]).map(t=>`<div class="pa-trow"><span>${esc(t.name)} (${t.rate}%)</span><span>${fmt(t.amount)}</span></div>`).join('');
+  const artRows=(doc.lignes||[]).filter(l=>l.desc||l.pu>0).map(l=>`<tr><td>${esc(l.desc)||'—'}</td><td style="text-align:center">${l.qte||1} ${esc(l.unite||'')}</td><td style="text-align:right">${fmt(l.pu||0)}</td><td style="text-align:right;font-weight:700">${fmt((l.qte||1)*(l.pu||0))}</td></tr>`).join('');
+  const st=doc.statut||'Émis';
+  $('docdetail-content').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h2 style="font-size:16px;font-weight:800;color:var(--text)">${DOC_ICONS[doc.type]||'📄'} ${esc(doc.type)} · ${esc(doc.num)}</h2>
+      <button onclick="closeDocDetail()" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px">✕ Fermer</button>
+    </div>
+    <div style="background:var(--bg);border-radius:12px;padding:12px;margin-bottom:12px">
+      <div class="t-row"><span>Client</span><span class="tv">${esc(doc.client)}</span></div>
+      <div class="t-row"><span>Date</span><span class="tv">${esc(doc.date)}</span></div>
+      ${doc.ttc>0?`<div class="t-row big"><span>Total TTC</span><span class="tv" style="color:${color}">${fmt(doc.ttc)}</span></div>`:''}
+    </div>
+    <div class="section"><div class="sec-head"><span class="sec-title">✏️ Modifier</span></div>
+      <div class="sec-body">
+        <label class="lbl">Statut du document</label>
+        <select class="fi" id="edit-statut" style="margin-bottom:8px">${['Émis','Payé','En attente','Partiel','Livré','Annulé'].map(s=>`<option${s===st?' selected':''}>${s}</option>`).join('')}</select>
+        <label class="lbl">Note / Observation</label>
+        <textarea class="fi" rows="3" id="edit-note" placeholder="Note ou observation sur ce document...">${esc(doc.editNote||'')}</textarea>
+        <button onclick="saveDocEdits('${doc.id}')" class="btn btn-primary" style="margin-top:8px">💾 Enregistrer les modifications</button>
+      </div>
+    </div>
+    <div class="section"><div class="sec-head"><span class="sec-title">🖨️ Aperçu du document</span></div>
+      <div class="sec-body" style="padding:0"><div style="background:#fff;padding:14px;font-size:10px;color:#333">
+        <div class="inv-ph">
+          <div style="display:flex;align-items:center;gap:8px">${logoHTML(40)}<div><p style="font-weight:800;font-size:11px;margin:0">${esc(doc.agency||agencyState.name)}</p><p style="font-size:8px;color:#888;margin:0">${esc(doc.agencyAddress||'')}</p></div></div>
+          <div style="text-align:right"><p style="font-weight:800;font-size:14px;color:${color};margin:0">${esc(doc.type)}</p><p style="font-size:8px;color:#888;margin:0">N° ${esc(doc.num)} · ${esc(doc.date)}</p>${doc.echeance?`<p style="font-size:8px;color:#888;margin:0">Échéance : ${esc(doc.echeance)}</p>`:''}</div>
+        </div>
+        <div style="background:#f0f6ff;padding:7px;border-radius:5px;font-size:9px;margin-bottom:8px"><p style="font-weight:700;margin:0 0 2px">Client</p><p style="font-weight:700;margin:0">${esc(doc.client)}</p>${doc.clientAddr?`<p style="color:#888;margin:0">${esc(doc.clientAddr)}</p>`:''}</div>
+        ${artRows?`<table class="inv-table"><thead><tr><th>Désignation</th><th>Qté</th><th>P.U.HT</th><th>Montant HT</th></tr></thead><tbody>${artRows}</tbody></table>`:''}
+        ${doc.ttc>0?`<div class="inv-totals">${taxRows}<div class="inv-ttc"><span>TOTAL TTC</span><span style="color:${color}">${fmt(doc.ttc)}</span></div></div>`:''}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+          <div style="border:1px dashed #ccc;border-radius:6px;padding:6px;text-align:center">${sigBox(doc.sigAgence,45)}<p style="font-size:8px;color:#999;margin-top:3px">Agence</p></div>
+          <div style="border:1px dashed #ccc;border-radius:6px;padding:6px;text-align:center">${sigBox(doc.sigClient,45)}<p style="font-size:8px;color:#999;margin-top:3px">Client</p></div>
+        </div>
+      </div></div>
+    </div>
+    <button onclick="exportDocPDF('${doc.id}')" class="btn btn-success">📥 Exporter en PDF</button>
+    <button onclick="deleteDoc('${doc.id}');closeDocDetail();" class="btn btn-outline" style="margin-top:8px;color:var(--red);border-color:var(--red)">🗑 Supprimer</button>`;
+  $('docdetail-overlay').classList.add('open');
+}
+function closeDocDetail(){$('docdetail-overlay').classList.remove('open');}
+function saveDocEdits(id){
+  const docs=loadDocs(),doc=docs.find(d=>d.id===id);if(!doc)return;
+  doc.statut=$('edit-statut').value;doc.editNote=$('edit-note').value;
+  if(!LS.set(KEY.docs,docs))return;
+  alert('✅ Modifications enregistrées !');renderDocsList();updateDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT PDF (impression)
+// ═══════════════════════════════════════════════════════════════
+function exportDocPDF(id){
+  const doc=loadDocs().find(d=>d.id===id);
+  if(!doc){alert('Document introuvable.');return;}
+  buildPrintArea(doc);
+  setTimeout(()=>window.print(),300);
+}
+function paLogo(){return agencyState.logoDataURL?`<img class="pa-logo" alt="" src="${agencyState.logoDataURL}">`:'<div class="pa-logo-txt">CJS</div>';}
+function buildPrintArea(doc){
+  const color=doc.color||agencyState.invoiceColor;
+  const taxRows=(doc.taxBreakdown||[]).map(t=>`<div class="pa-trow"><span>${esc(t.name)} (${t.rate}%)</span><span>${fmt(t.amount)}</span></div>`).join('');
+  const artRows=(doc.lignes||[]).filter(l=>l.desc||l.pu>0).map((l,i)=>`<tr style="background:${i%2===0?'#fff':'#fafafa'}"><td>${esc(l.desc)||'—'}</td><td style="text-align:center">${l.qte||1} ${esc(l.unite||'')}</td><td style="text-align:right">${l.pu>0?fmt(l.pu):'—'}</td><td style="text-align:right;font-weight:700">${l.pu>0?fmt((l.qte||1)*l.pu):'—'}</td></tr>`).join('');
+  const ag=esc(doc.agency||agencyState.name),addr=esc(doc.agencyAddress||'Yaoundé, Cameroun');
+  $('print-area').innerHTML=`
+    <div class="pa-header">
+      <div style="display:flex;align-items:center;gap:12px">${paLogo()}
+        <div><p style="font-weight:900;font-size:14px;color:#1a1a2e;margin:0">${ag}</p>
+        <p style="font-size:9px;color:#888;margin:1px 0">${addr}</p>
+        ${doc.agencyPhone?`<p style="font-size:9px;color:#888;margin:0">${esc(doc.agencyPhone)}</p>`:''}
+        ${doc.agencyEmail?`<p style="font-size:9px;color:#888;margin:0">${esc(doc.agencyEmail)}</p>`:''}
+        ${doc.agencyNiu?`<p style="font-size:9px;color:#888;margin:0">NIU : ${esc(doc.agencyNiu)}</p>`:''}</div>
+      </div>
+      <div style="text-align:right">
+        <p class="pa-doc-type" style="color:${color};margin:0">${esc(doc.type)}</p>
+        <p style="font-size:10px;color:#888;margin:2px 0 0">N° ${esc(doc.num)}</p>
+        <p style="font-size:10px;color:#888;margin:0">Date : ${esc(doc.date)}</p>
+        ${doc.echeance?`<p style="font-size:10px;color:#888;margin:0">Échéance : ${esc(doc.echeance)}</p>`:''}
+        ${doc.statut?`<span style="background:${color}22;color:${color};padding:2px 10px;border-radius:12px;font-size:9px;font-weight:700">${esc(doc.statut)}</span>`:''}
+      </div>
+    </div>
+    <div class="pa-parties">
+      <div class="pa-party" style="background:#f8f8f8"><p style="font-weight:700;color:#1a1a2e;margin:0 0 4px">Émetteur</p><p style="font-weight:700;margin:0">${ag}</p><p style="color:#888;margin:1px 0">${addr}</p>${doc.agencyNiu?`<p style="color:#888;margin:0">NIU : ${esc(doc.agencyNiu)}</p>`:''}${doc.agencyRc?`<p style="color:#888;margin:0">RC : ${esc(doc.agencyRc)}</p>`:''}</div>
+      <div class="pa-party" style="background:#f0f6ff"><p style="font-weight:700;color:#1a1a2e;margin:0 0 4px">${doc.type==='BL'?'Destinataire':'Client'}</p><p style="font-weight:700;margin:0">${esc(doc.client)}</p>
+        ${doc.clientNiu?`<p style="color:#888;margin:0">NIU : ${esc(doc.clientNiu)}</p>`:''}${doc.clientAddr?`<p style="color:#888;margin:0">${esc(doc.clientAddr)}</p>`:''}${doc.clientTel?`<p style="color:#888;margin:0">${esc(doc.clientTel)}</p>`:''}${doc.clientEmail?`<p style="color:#888;margin:0">${esc(doc.clientEmail)}</p>`:''}</div>
+    </div>
+    ${doc.objet?`<div style="background:#fff3e0;border-left:3px solid #EF9F27;padding:6px 10px;margin-bottom:10px;border-radius:0 6px 6px 0;font-size:10px;color:#854F0B">Objet : <strong>${esc(doc.objet)}</strong></div>`:''}
+    ${artRows?`<table class="pa-table"><thead><tr><th>Désignation</th><th>Qté</th><th>P.U. HT</th><th>Montant HT</th></tr></thead><tbody>${artRows}</tbody></table>`:''}
+    ${doc.ttc>0?`<div class="pa-totals">
+      ${doc.ht>0?`<div class="pa-trow"><span>Sous-total HT</span><span>${fmt(doc.ht)}</span></div>`:''}
+      ${doc.remise>0?`<div class="pa-trow"><span>Remise</span><span style="color:#E24B4A">- ${fmt(doc.remise)}</span></div>`:''}
+      ${taxRows}
+      ${doc.livMontant>0?`<div class="pa-trow"><span>Frais de livraison</span><span>${fmt(doc.livMontant)}</span></div>`:''}
+      ${doc.livLabel==='Livraison offerte'?'<div class="pa-trow"><span style="color:#1D9E75">🎁 Livraison offerte</span><span style="color:#1D9E75">OFFERT</span></div>':''}
+      <div class="pa-ttc"><span>${doc.type==='REÇU'?'MONTANT REÇU':'TOTAL TTC'}</span><span style="color:${color}">${fmt(doc.ttc)}</span></div>
+    </div>${doc.mode?`<p style="font-size:10px;color:#666;margin-top:8px">💳 Mode de paiement : <strong>${esc(doc.mode)}</strong></p>`:''}`:''}
+    ${doc.note?`<p style="font-size:9px;color:#888;font-style:italic;margin-top:4px">${esc(doc.note)}</p>`:''}
+    ${doc.editNote?`<div style="background:#fff3e0;border-radius:6px;padding:8px;margin-top:6px;font-size:9px;color:#854F0B"><strong>Note :</strong> ${esc(doc.editNote)}</div>`:''}
+    ${doc.policy?`<div class="pa-policy"><p style="font-size:9px;font-weight:700;color:#555;margin:0 0 4px">POLITIQUE COMMERCIALE</p><p style="font-size:8.5px;color:#666;margin:0;white-space:pre-line">${esc(doc.policy)}</p></div>`:''}
+    <div class="pa-sigs">
+      <div class="pa-sig-box">${sigBox(doc.sigAgence,55)}<p style="font-size:9px;color:#999;margin-top:4px">Signature ${ag}</p></div>
+      <div class="pa-sig-box">${sigBox(doc.sigClient,55)}<p style="font-size:9px;color:#999;margin-top:4px">Signature client</p></div>
+    </div>
+    <div class="pa-footer">${ag} — ${addr} — Document généré le ${new Date().toLocaleDateString('fr-FR')}<br>Conformément à la législation fiscale camerounaise</div>`;
+}
+function exportBilanPDF(){
+  const docs=loadDocs(),fac=docs.filter(d=>d.type==='FACTURE'),rec=docs.filter(d=>d.type==='REÇU');
+  const tHT=fac.reduce((s,d)=>s+(d.ht||0),0),tTax=fac.reduce((s,d)=>s+(d.totalTax||0),0),tTTC=fac.reduce((s,d)=>s+(d.ttc||0),0);
+  const tRec=rec.reduce((s,d)=>s+(d.ttc||0),0);
+  const color=agencyState.invoiceColor;
+  const badge=st=>{const p=st==='Payé'||st==='Livré'?['#E1F5EE','#1D9E75']:st==='Annulé'?['#FCEBEB','#E24B4A']:['#FAEEDA','#EF9F27'];return `<span style="background:${p[0]};color:${p[1]};padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">${esc(st||'Émis')}</span>`;};
+  const docRows=docs.slice(0,60).map((d,i)=>`<tr style="background:${i%2===0?'#fff':'#fafafa'}"><td>${DOC_ICONS[d.type]||'📄'} ${esc(d.type)}</td><td>${esc(d.num)}</td><td>${esc(d.client)}</td><td>${esc(d.date)}</td><td style="text-align:right">${d.ht>0?fmt(d.ht):'—'}</td><td style="text-align:right">${d.totalTax>0?fmt(d.totalTax):'—'}</td><td style="text-align:right;font-weight:700">${d.ttc>0?fmt(d.ttc):'—'}</td><td>${badge(d.statut)}</td></tr>`).join('');
+  const stockRows=stockData.slice(0,30).map((a,i)=>{const st=getStatut(a.qte,a.min);return `<tr style="background:${i%2===0?'#fff':'#fafafa'}"><td>${a.icon||'📦'} ${esc(a.nom)}</td><td>${esc(a.cat)}</td><td style="text-align:center">${fmtN(a.qte)} ${esc(a.unite)}</td><td style="text-align:center">${fmtN(a.min)}</td><td style="text-align:right">${fmt(a.pu)}</td><td style="text-align:right;font-weight:700">${fmt(a.qte*a.pu)}</td><td><span style="color:${st.color};font-weight:700;font-size:9px">${st.label}</span></td></tr>`;}).join('');
+  $('print-area').innerHTML=`
+    <div class="pa-header">
+      <div style="display:flex;align-items:center;gap:12px">${paLogo()}<div><p style="font-weight:900;font-size:14px;color:#1a1a2e;margin:0">${esc(agencyState.name)}</p><p style="font-size:9px;color:#888;margin:1px 0">${esc(agencyState.address)}</p>${agencyState.phone?`<p style="font-size:9px;color:#888;margin:0">${esc(agencyState.phone)}</p>`:''}</div></div>
+      <div style="text-align:right"><p class="pa-doc-type" style="color:${color}">BILAN D'ACTIVITÉS</p><p style="font-size:10px;color:#888;margin:2px 0 0">Exporté le ${new Date().toLocaleDateString('fr-FR')}</p><p style="font-size:10px;color:#888;margin:0">${docs.length} document(s)</p></div>
+    </div>
+    <div class="pa-bilan-kpi">
+      <div class="pa-kpi" style="border-left:4px solid ${color}"><div class="pa-kpi-val" style="color:${color}">${fmt(tTTC)}</div><div class="pa-kpi-lbl">CA TTC (factures)</div></div>
+      <div class="pa-kpi" style="border-left:4px solid #1D9E75"><div class="pa-kpi-val" style="color:#1D9E75">${fmt(tHT)}</div><div class="pa-kpi-lbl">CA Hors Taxes</div></div>
+      <div class="pa-kpi" style="border-left:4px solid #EF9F27"><div class="pa-kpi-val" style="color:#EF9F27">${fmt(tTax)}</div><div class="pa-kpi-lbl">Taxes collectées</div></div>
+      <div class="pa-kpi" style="border-left:4px solid #185FA5"><div class="pa-kpi-val" style="color:#185FA5">${fmt(tRec)}</div><div class="pa-kpi-lbl">Encaissements (reçus)</div></div>
+    </div>
+    <h2 style="font-size:13px;font-weight:800;color:#1a1a2e;margin:16px 0 8px;border-bottom:2px solid ${color};padding-bottom:4px">📋 Détail des documents</h2>
+    ${docs.length?`<table class="pa-table"><thead><tr><th>Type</th><th>N°</th><th>Client</th><th>Date</th><th>HT</th><th>Taxes</th><th>TTC</th><th>Statut</th></tr></thead><tbody>${docRows}</tbody></table>`:'<p style="color:#888;font-size:10px">Aucun document enregistré.</p>'}
+    <h2 style="font-size:13px;font-weight:800;color:#1a1a2e;margin:20px 0 8px;border-bottom:2px solid ${color};padding-bottom:4px">🏬 État des stocks</h2>
+    ${stockData.length?`<table class="pa-table"><thead><tr><th>Article</th><th>Catégorie</th><th>Stock</th><th>Min</th><th>P.U.</th><th>Valeur</th><th>Statut</th></tr></thead><tbody>${stockRows}</tbody></table><p style="font-size:10px;font-weight:700;text-align:right">Valeur totale : ${fmt(stockData.reduce((s,a)=>s+a.qte*a.pu,0))}</p>`:'<p style="color:#888;font-size:10px">Aucun article en stock.</p>'}
+    <div class="pa-footer">${esc(agencyState.name)} — Bilan d'activités — ${new Date().toLocaleDateString('fr-FR')}</div>`;
+  setTimeout(()=>window.print(),300);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AGENDA
+// ═══════════════════════════════════════════════════════════════
+let calDate=new Date(),agFilter='all',editingEventId=null;
+const loadEvents=()=>LS.get(KEY.agenda,[]);
+const saveEvents=e=>LS.set(KEY.agenda,e);
+
+function openNewEvent(pre){
+  editingEventId=null;
+  $('event-modal-title').textContent='📅 Nouvel événement';
+  $('ev-titre').value=pre?.titre||'';$('ev-type').value=pre?.type||'echeance';
+  $('ev-date').value=pre?.date||isoToday();$('ev-heure').value=pre?.heure||'09:00';
+  $('ev-priorite').value=pre?.priorite||'normale';$('ev-client').value=pre?.client||'';
+  $('ev-montant').value=pre?.montant||'';$('ev-note').value=pre?.note||'';
+  $('ev-delete-wrap').style.display='none';$('ev-save-btn').textContent='Enregistrer';
+  $('event-overlay').classList.add('open');
+}
+function openEditEvent(id){
+  const ev=loadEvents().find(e=>e.id===id);if(!ev)return;
+  editingEventId=id;
+  $('event-modal-title').textContent="✏️ Modifier l'événement";
+  $('ev-titre').value=ev.titre;$('ev-type').value=ev.type;$('ev-date').value=ev.date;
+  $('ev-heure').value=ev.heure||'';$('ev-priorite').value=ev.priorite||'normale';
+  $('ev-client').value=ev.client||'';$('ev-montant').value=ev.montant||'';$('ev-note').value=ev.note||'';
+  $('ev-delete-wrap').style.display='block';$('ev-save-btn').textContent='💾 Mettre à jour';
+  $('event-overlay').classList.add('open');
+}
+function closeNewEvent(){$('event-overlay').classList.remove('open');editingEventId=null;}
+function refreshAgenda(){renderCalendar();renderAgenda();updateDashboard();}
+function saveEvent(){
+  const titre=$('ev-titre').value.trim(),date=$('ev-date').value;
+  if(!titre){alert('Le titre est requis.');return;}
+  if(!date){alert('La date est requise.');return;}
+  const evts=loadEvents();
+  const ev={id:editingEventId||('ev-'+Date.now()),titre,date,type:$('ev-type').value,heure:$('ev-heure').value,priorite:$('ev-priorite').value,client:$('ev-client').value,montant:parseFloat($('ev-montant').value)||0,note:$('ev-note').value,done:false,created:new Date().toISOString()};
+  if(editingEventId){const i=evts.findIndex(e=>e.id===editingEventId);if(i>=0){ev.done=evts[i].done;evts[i]=ev;}}
+  else evts.unshift(ev);
+  if(!saveEvents(evts))return;
+  closeNewEvent();refreshAgenda();
+}
+function deleteCurrentEvent(){
+  if(!editingEventId||!confirm('Supprimer cet événement ?'))return;
+  saveEvents(loadEvents().filter(e=>e.id!==editingEventId));
+  closeNewEvent();refreshAgenda();
+}
+function toggleEventDone(id){
+  const evts=loadEvents(),ev=evts.find(e=>e.id===id);
+  if(ev){ev.done=!ev.done;saveEvents(evts);refreshAgenda();}
+}
+function setAgFilter(f){agFilter=f;styleFilters('agenda-filters',f);renderAgenda();}
+function formatEvDate(s){return new Date(s+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});}
+function renderAgenda(){
+  const t0=isoToday();
+  const evts=loadEvents().filter(e=>agFilter==='all'||e.type===agFilter).sort((a,b)=>a.date.localeCompare(b.date));
+  const urgents=evts.filter(e=>!e.done&&e.date<=t0),upcoming=evts.filter(e=>!e.done&&e.date>t0),done=evts.filter(e=>e.done);
+  $('agenda-count').textContent=evts.length;
+  $('agenda-urgents').innerHTML=urgents.map(e=>{
+    const t=EV_TYPES[e.type]||EV_TYPES.autre,late=e.date<t0;
+    return `<div style="background:${late?'#FCEBEB':'#FAEEDA'};border-left:4px solid ${late?'#E24B4A':'#EF9F27'};border-radius:0 10px 10px 0;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openEditEvent('${e.id}')">
+      <span style="font-size:20px">${t.icon}</span>
+      <div style="flex:1;min-width:0"><p style="font-size:12px;font-weight:700;color:${late?'#E24B4A':'#854F0B'};margin:0">${late?'⚠ EN RETARD':"📌 AUJOURD'HUI"} — ${esc(e.titre)}</p>
+      ${e.client?`<p style="font-size:10px;color:var(--muted);margin:0">${esc(e.client)}</p>`:''}${e.montant>0?`<p style="font-size:11px;font-weight:700;color:var(--text);margin:0">${fmt(e.montant)}</p>`:''}</div>
+      <button onclick="event.stopPropagation();toggleEventDone('${e.id}')" style="background:#1D9E75;color:#fff;border:none;border-radius:7px;padding:5px 9px;font-size:10px;font-weight:700;cursor:pointer">✓ Fait</button>
+    </div>`;}).join('');
+  const el=$('agenda-list');
+  if(!evts.length){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">Aucun événement — appuyez sur « + Nouveau »</div>';return;}
+  const group=(g,label,color)=>!g.length?'':`<p style="font-size:10px;font-weight:800;color:${color};text-transform:uppercase;letter-spacing:.5px;margin:10px 0 6px">${label} (${g.length})</p>`+g.map(e=>{
+    const t=EV_TYPES[e.type]||EV_TYPES.autre,dp=e.priorite==='urgente'?'🔴':e.priorite==='haute'?'🟡':'🟢';
+    return `<div style="background:${e.done?'var(--bg)':t.bg};border:1px solid ${e.done?'var(--border)':t.color+'44'};border-radius:12px;padding:11px;margin-bottom:7px;display:flex;align-items:center;gap:10px;opacity:${e.done?'.55':'1'};cursor:pointer" onclick="openEditEvent('${e.id}')">
+      <div style="width:36px;height:36px;border-radius:10px;background:${t.color}22;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${t.icon}</div>
+      <div style="flex:1;min-width:0">
+        <p style="font-size:12px;font-weight:700;color:var(--text);margin:0;text-decoration:${e.done?'line-through':'none'}">${dp} ${esc(e.titre)}</p>
+        <p style="font-size:10px;color:var(--muted);margin:1px 0">${esc(formatEvDate(e.date))}${e.heure?' à '+esc(e.heure):''} ${e.client?'· '+esc(e.client):''}</p>
+        ${e.montant>0?`<p style="font-size:11px;font-weight:700;color:${t.color};margin:0">${fmt(e.montant)}</p>`:''}
+        ${e.note?`<p style="font-size:10px;color:var(--muted);margin:2px 0 0;font-style:italic">${esc(e.note)}</p>`:''}
+      </div>
+      <button onclick="event.stopPropagation();toggleEventDone('${e.id}')" style="background:${e.done?'var(--border)':'#1D9E75'};color:${e.done?'var(--muted)':'#fff'};border:none;border-radius:7px;padding:5px 8px;font-size:11px;cursor:pointer">${e.done?'↩':'✓'}</button>
+    </div>`;}).join('');
+  el.innerHTML=group(upcoming,'À venir','#0088CC')+group(urgents,'Passé non traité','#E24B4A')+group(done,'Terminés','#1D9E75');
+}
+function renderCalendar(){
+  const evts=loadEvents(),y=calDate.getFullYear(),m=calDate.getMonth();
+  $('cal-month-label').textContent=new Date(y,m,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase());
+  const startDay=(new Date(y,m,1).getDay()+6)%7,days=new Date(y,m+1,0).getDate(),now=new Date();
+  const cells=[];for(let i=0;i<startDay;i++)cells.push('');for(let d=1;d<=days;d++)cells.push(d);
+  const byDay={};
+  evts.forEach(e=>{const ed=new Date(e.date+'T00:00:00');if(ed.getFullYear()===y&&ed.getMonth()===m)(byDay[ed.getDate()]=byDay[ed.getDate()]||[]).push(e);});
+  $('cal-grid').innerHTML=cells.map(d=>{
+    if(!d)return '<div></div>';
+    const isToday=d===now.getDate()&&m===now.getMonth()&&y===now.getFullYear(),l=byDay[d]||[];
+    const dot=l.length?(l.some(e=>e.priorite==='urgente'||e.type==='echeance')?'#E24B4A':'#00AADD'):'transparent';
+    return `<div onclick="calDayClick(${y},${m},${d})" style="display:flex;align-items:center;justify-content:center;height:30px;border-radius:8px;cursor:pointer;position:relative;background:${isToday?'#0088CC':'rgba(255,255,255,.06)'};font-size:11px;font-weight:${isToday?'800':'500'};color:${isToday?'#fff':'rgba(255,255,255,.7)'}">${d}${l.length?`<div style="width:5px;height:5px;border-radius:50%;background:${dot};position:absolute;bottom:3px"></div>`:''}</div>`;
+  }).join('');
+}
+function navMonth(dir){calDate=new Date(calDate.getFullYear(),calDate.getMonth()+dir,1);renderCalendar();}
+function calDayClick(y,m,d){openNewEvent({date:`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`});}
+
+// ═══════════════════════════════════════════════════════════════
+// INITIALISATION
+// ═══════════════════════════════════════════════════════════════
+function init(){
+  applyColor(agencyState.invoiceColor||'#0088CC');
+  fillSettingsFields();applySettings();refreshLogos();
+
+  // Formulaire facture
+  $('inv-date-lbl').textContent=today();
+  $('iv-date').value=today();$('iv-ech').value=addDays(30);
+  refreshInvNum();renderInvStepBar();addInvLigne();initInvTaxes();
+
+  // Bons
+  bcNum=peekNum('BC');$('bc-num-lbl').textContent='N° '+bcNum+' · '+today();addBCLigne();
+  blNum=peekNum('BL');$('bl-num-lbl').textContent='N° '+blNum+' · '+today();addBLArticle();
+  rcNum=peekNum('R');$('rc-num-lbl').textContent='N° '+rcNum+' · '+today();updateRcStatut();
+
+  // Stock / agenda
+  $('stock-date-lbl').textContent=today();
+  styleFilters('stock-filters','Tous');styleFilters('agenda-filters','all');
+  updateStockMeta();renderStock();renderMouvHistory();
+  renderCalendar();renderAgenda();updateDashboard();
+
+  initAllSigs();
+
+  // Retour à l'écran demandé après un « Nouveau document »
+  const go=sessionStorage.getItem('cjs_go');
+  if(go){sessionStorage.removeItem('cjs_go');$('splash').style.display='none';goScreen(go);}
+  else setTimeout(()=>$('splash').classList.add('hide'),1500);
+}
+init();
 </script>
 </body>
 </html>
