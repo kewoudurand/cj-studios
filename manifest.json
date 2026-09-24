@@ -1,7 +1,7 @@
 {
   "name": "CJ Studios",
   "short_name": "CJ Studios",
-  "start_url": "./Cjstudios.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0A1F44",
   "theme_color": "#0A1F44",
